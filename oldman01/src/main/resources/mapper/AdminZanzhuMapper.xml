@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.zanzhu.mapper.AdminZanzhuMapper">
+
+    <select id="findRenList" resultType="map">
+        select
+            id,
+            zanzhu_renming as zanzhuRenming,
+            zanzhu_leixing as zanzhuLeixing,
+            lianxi_ren as lianxiRen,
+            lianxi_dianhua as lianxiDianhua,
+            youxiang,
+            dizhi,
+            jianjie,
+            touxiang_url as touxiangUrl,
+            gongkai_zhuangtai as gongkaiZhuangtai,
+            chuangjian_shijian as chuangjianShijian,
+            gengxin_shijian as gengxinShijian
+        from zanzhu_ren
+        where shanchu_zhuangtai = 0
+        <if test="keyword != null and keyword != ''">
+            and (
+                zanzhu_renming like concat('%', #{keyword}, '%')
+                or lianxi_ren like concat('%', #{keyword}, '%')
+                or lianxi_dianhua like concat('%', #{keyword}, '%')
+            )
+        </if>
+        order by id desc
+    </select>
+
+    <insert id="insertRen" parameterType="map">
+        insert into zanzhu_ren (
+            zanzhu_renming, zanzhu_leixing, lianxi_ren, lianxi_dianhua,
+            youxiang, dizhi, jianjie, touxiang_url, gongkai_zhuangtai, shanchu_zhuangtai
+        ) values (
+            #{zanzhuRenming}, #{zanzhuLeixing}, #{lianxiRen}, #{lianxiDianhua},
+            #{youxiang}, #{dizhi}, #{jianjie}, #{touxiangUrl}, coalesce(#{gongkaiZhuangtai}, 1), 0
+        )
+    </insert>
+
+    <update id="updateRen" parameterType="map">
+        update zanzhu_ren
+        set zanzhu_renming = #{zanzhuRenming},
+            zanzhu_leixing = #{zanzhuLeixing},
+            lianxi_ren = #{lianxiRen},
+            lianxi_dianhua = #{lianxiDianhua},
+            youxiang = #{youxiang},
+            dizhi = #{dizhi},
+            jianjie = #{jianjie},
+            touxiang_url = #{touxiangUrl},
+            gongkai_zhuangtai = coalesce(#{gongkaiZhuangtai}, 1)
+        where id = #{id}
+          and shanchu_zhuangtai = 0
+    </update>
+
+    <update id="deleteRen">
+        update zanzhu_ren set shanchu_zhuangtai = 1 where id = #{id}
+    </update>
+
+    <select id="findJiluList" resultType="map">
+        select
+            zj.id,
+            zj.zanzhu_ren_id as zanzhuRenId,
+            zr.zanzhu_renming as zanzhuRenming,
+            zj.zanzhu_biaoti as zanzhuBiaoti,
+            zj.zanzhu_fangshi as zanzhuFangshi,
+            zj.zanzhu_jine as zanzhuJine,
+            zj.zanzhu_riqi as zanzhuRiqi,
+            zj.zanzhu_yongtu as zanzhuYongtu,
+            zj.zanzhu_shuoming as zanzhuShuoming,
+            zj.pingzheng_tupian as pingzhengTupian,
+            zj.gongkai_zhuangtai as gongkaiZhuangtai,
+            zj.shenhe_zhuangtai as shenheZhuangtai,
+            zj.chuangjian_shijian as chuangjianShijian,
+            zj.gengxin_shijian as gengxinShijian
+        from zanzhu_jilu zj
+        join zanzhu_ren zr on zj.zanzhu_ren_id = zr.id
+        where zj.shanchu_zhuangtai = 0
+          and zr.shanchu_zhuangtai = 0
+        <if test="keyword != null and keyword != ''">
+            and (
+                zj.zanzhu_biaoti like concat('%', #{keyword}, '%')
+                or zr.zanzhu_renming like concat('%', #{keyword}, '%')
+                or zj.zanzhu_fangshi like concat('%', #{keyword}, '%')
+            )
+        </if>
+        order by zj.zanzhu_riqi desc, zj.id desc
+    </select>
+
+    <insert id="insertJilu" parameterType="map">
+        insert into zanzhu_jilu (
+            zanzhu_ren_id, zanzhu_biaoti, zanzhu_fangshi, zanzhu_jine,
+            zanzhu_riqi, zanzhu_yongtu, zanzhu_shuoming, pingzheng_tupian,
+            gongkai_zhuangtai, shenhe_zhuangtai, shanchu_zhuangtai
+        ) values (
+            #{zanzhuRenId}, #{zanzhuBiaoti}, #{zanzhuFangshi}, coalesce(#{zanzhuJine}, 0),
+            #{zanzhuRiqi}, #{zanzhuYongtu}, #{zanzhuShuoming}, #{pingzhengTupian},
+            coalesce(#{gongkaiZhuangtai}, 1), coalesce(#{shenheZhuangtai}, '已确认'), 0
+        )
+    </insert>
+
+    <update id="updateJilu" parameterType="map">
+        update zanzhu_jilu
+        set zanzhu_ren_id = #{zanzhuRenId},
+            zanzhu_biaoti = #{zanzhuBiaoti},
+            zanzhu_fangshi = #{zanzhuFangshi},
+            zanzhu_jine = coalesce(#{zanzhuJine}, 0),
+            zanzhu_riqi = #{zanzhuRiqi},
+            zanzhu_yongtu = #{zanzhuYongtu},
+            zanzhu_shuoming = #{zanzhuShuoming},
+            pingzheng_tupian = #{pingzhengTupian},
+            gongkai_zhuangtai = coalesce(#{gongkaiZhuangtai}, 1),
+            shenhe_zhuangtai = coalesce(#{shenheZhuangtai}, '已确认')
+        where id = #{id}
+          and shanchu_zhuangtai = 0
+    </update>
+
+    <update id="deleteJilu">
+        update zanzhu_jilu set shanchu_zhuangtai = 1 where id = #{id}
+    </update>
+
+    <select id="findWuziList" resultType="map">
+        select
+            w.id,
+            w.zanzhu_jilu_id as zanzhuJiluId,
+            zj.zanzhu_biaoti as zanzhuBiaoti,
+            zr.zanzhu_renming as zanzhuRenming,
+            w.wuzi_mingcheng as wuziMingcheng,
+            w.wuzi_leibie as wuziLeibie,
+            w.shuliang,
+            w.danwei,
+            w.guji_jiazhi as gujiJiazhi,
+            w.baozhiqi,
+            w.ruku_zhuangtai as rukuZhuangtai,
+            w.tupian_url as tupianUrl,
+            w.beizhu,
+            w.chuangjian_shijian as chuangjianShijian,
+            w.gengxin_shijian as gengxinShijian
+        from wuzi_juanzeng w
+        join zanzhu_jilu zj on w.zanzhu_jilu_id = zj.id
+        join zanzhu_ren zr on zj.zanzhu_ren_id = zr.id
+        where w.shanchu_zhuangtai = 0
+          and zj.shanchu_zhuangtai = 0
+          and zr.shanchu_zhuangtai = 0
+        <if test="keyword != null and keyword != ''">
+            and (
+                w.wuzi_mingcheng like concat('%', #{keyword}, '%')
+                or w.wuzi_leibie like concat('%', #{keyword}, '%')
+                or zr.zanzhu_renming like concat('%', #{keyword}, '%')
+            )
+        </if>
+        order by w.id desc
+    </select>
+
+    <insert id="insertWuzi" parameterType="map">
+        insert into wuzi_juanzeng (
+            zanzhu_jilu_id, wuzi_mingcheng, wuzi_leibie, shuliang,
+            danwei, guji_jiazhi, baozhiqi, ruku_zhuangtai, tupian_url, beizhu, shanchu_zhuangtai
+        ) values (
+            #{zanzhuJiluId}, #{wuziMingcheng}, #{wuziLeibie}, coalesce(#{shuliang}, 1),
+            coalesce(#{danwei}, '件'), coalesce(#{gujiJiazhi}, 0), #{baozhiqi},
+            coalesce(#{rukuZhuangtai}, '已入库'), #{tupianUrl}, #{beizhu}, 0
+        )
+    </insert>
+
+    <update id="updateWuzi" parameterType="map">
+        update wuzi_juanzeng
+        set zanzhu_jilu_id = #{zanzhuJiluId},
+            wuzi_mingcheng = #{wuziMingcheng},
+            wuzi_leibie = #{wuziLeibie},
+            shuliang = coalesce(#{shuliang}, 1),
+            danwei = coalesce(#{danwei}, '件'),
+            guji_jiazhi = coalesce(#{gujiJiazhi}, 0),
+            baozhiqi = #{baozhiqi},
+            ruku_zhuangtai = coalesce(#{rukuZhuangtai}, '已入库'),
+            tupian_url = #{tupianUrl},
+            beizhu = #{beizhu}
+        where id = #{id}
+          and shanchu_zhuangtai = 0
+    </update>
+
+    <update id="deleteWuzi">
+        update wuzi_juanzeng set shanchu_zhuangtai = 1 where id = #{id}
+    </update>
+
+    <select id="findYongtuList" resultType="map">
+        select
+            y.id,
+            y.zanzhu_jilu_id as zanzhuJiluId,
+            zj.zanzhu_biaoti as zanzhuBiaoti,
+            zr.zanzhu_renming as zanzhuRenming,
+            y.yongtu_mingcheng as yongtuMingcheng,
+            y.yongtu_leibie as yongtuLeibie,
+            y.shiyong_jine as shiyongJine,
+            y.shiyong_riqi as shiyongRiqi,
+            y.shiyong_shuoming as shiyongShuoming,
+            y.gongkai_zhuangtai as gongkaiZhuangtai,
+            y.pingzheng_tupian as pingzhengTupian,
+            y.chuangjian_shijian as chuangjianShijian,
+            y.gengxin_shijian as gengxinShijian
+        from zanzhu_yongtu y
+        join zanzhu_jilu zj on y.zanzhu_jilu_id = zj.id
+        join zanzhu_ren zr on zj.zanzhu_ren_id = zr.id
+        where y.shanchu_zhuangtai = 0
+          and zj.shanchu_zhuangtai = 0
+          and zr.shanchu_zhuangtai = 0
+        <if test="keyword != null and keyword != ''">
+            and (
+                y.yongtu_mingcheng like concat('%', #{keyword}, '%')
+                or y.yongtu_leibie like concat('%', #{keyword}, '%')
+                or zr.zanzhu_renming like concat('%', #{keyword}, '%')
+            )
+        </if>
+        order by y.shiyong_riqi desc, y.id desc
+    </select>
+
+    <insert id="insertYongtu" parameterType="map">
+        insert into zanzhu_yongtu (
+            zanzhu_jilu_id, yongtu_mingcheng, yongtu_leibie, shiyong_jine,
+            shiyong_riqi, shiyong_shuoming, gongkai_zhuangtai, pingzheng_tupian, shanchu_zhuangtai
+        ) values (
+            #{zanzhuJiluId}, #{yongtuMingcheng}, #{yongtuLeibie}, coalesce(#{shiyongJine}, 0),
+            #{shiyongRiqi}, #{shiyongShuoming}, coalesce(#{gongkaiZhuangtai}, 1), #{pingzhengTupian}, 0
+        )
+    </insert>
+
+    <update id="updateYongtu" parameterType="map">
+        update zanzhu_yongtu
+        set zanzhu_jilu_id = #{zanzhuJiluId},
+            yongtu_mingcheng = #{yongtuMingcheng},
+            yongtu_leibie = #{yongtuLeibie},
+            shiyong_jine = coalesce(#{shiyongJine}, 0),
+            shiyong_riqi = #{shiyongRiqi},
+            shiyong_shuoming = #{shiyongShuoming},
+            gongkai_zhuangtai = coalesce(#{gongkaiZhuangtai}, 1),
+            pingzheng_tupian = #{pingzhengTupian}
+        where id = #{id}
+          and shanchu_zhuangtai = 0
+    </update>
+
+    <update id="deleteYongtu">
+        update zanzhu_yongtu set shanchu_zhuangtai = 1 where id = #{id}
+    </update>
+
+    <select id="findYixiangList" resultType="map">
+        select
+            id,
+            xingming,
+            lianxi_dianhua as lianxiDianhua,
+            zanzhu_fangshi as zanzhuFangshi,
+            zanzhu_shuoming as zanzhuShuoming,
+            beizhu,
+            chuli_zhuangtai as chuliZhuangtai,
+            chuli_beizhu as chuliBeizhu,
+            chuangjian_shijian as chuangjianShijian,
+            gengxin_shijian as gengxinShijian
+        from zanzhu_yixiang
+        where shanchu_zhuangtai = '正常'
+        <if test="keyword != null and keyword != ''">
+            and (
+                xingming like concat('%', #{keyword}, '%')
+                or lianxi_dianhua like concat('%', #{keyword}, '%')
+                or zanzhu_fangshi like concat('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="chuliZhuangtai != null and chuliZhuangtai != ''">
+            and chuli_zhuangtai = #{chuliZhuangtai}
+        </if>
+        order by id desc
+    </select>
+
+    <select id="findYixiangById" resultType="map">
+        select
+            id,
+            xingming,
+            lianxi_dianhua as lianxiDianhua,
+            zanzhu_fangshi as zanzhuFangshi,
+            zanzhu_shuoming as zanzhuShuoming,
+            beizhu,
+            chuli_zhuangtai as chuliZhuangtai,
+            chuli_beizhu as chuliBeizhu,
+            chuangjian_shijian as chuangjianShijian,
+            gengxin_shijian as gengxinShijian
+        from zanzhu_yixiang
+        where id = #{id}
+          and shanchu_zhuangtai = '正常'
+    </select>
+
+    <update id="updateYixiangStatus" parameterType="map">
+        update zanzhu_yixiang
+        set chuli_zhuangtai = #{chuliZhuangtai},
+            chuli_beizhu = #{chuliBeizhu}
+        where id = #{id}
+          and shanchu_zhuangtai = '正常'
+    </update>
+
+    <update id="deleteYixiang">
+        update zanzhu_yixiang
+        set shanchu_zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.admin.mapper.AdminFeiyongMapper">
+    <sql id="ZhangdanColumns">
+        fz.id,
+        fz.laoren_id as laorenId,
+        l.xingming as laorenXingming,
+        fz.zhangdan_yuefen as zhangdanYuefen,
+        fz.chuangwei_fei as chuangweiFei,
+        fz.huli_fei as huliFei,
+        fz.yaopin_fei as yaopinFei,
+        fz.qita_fei as qitaFei,
+        fz.zongjine,
+        coalesce(jf.yijiao_jine, 0) as yijiaoJine,
+        greatest(coalesce(fz.zongjine, 0) - coalesce(jf.yijiao_jine, 0), 0) as weiJiaoJine,
+        case
+            when fz.zhuangtai = '已取消' then '已取消'
+            when coalesce(jf.yijiao_jine, 0) = 0 then '待缴费'
+            when coalesce(jf.yijiao_jine, 0) >= coalesce(fz.zongjine, 0) then '已结清'
+            else '部分缴费'
+        end as zhuangtai,
+        fz.beizhu,
+        fz.shengcheng_shijian as shengchengShijian
+    </sql>
+
+    <sql id="ZhangdanFrom">
+        from feiyong_zhangdan fz
+        join laoren_xinxi l on fz.laoren_id = l.id
+        left join (
+            select zhangdan_id, sum(jiaofei_jine) as yijiao_jine
+            from jiaofei_jilu
+            group by zhangdan_id
+        ) jf on fz.id = jf.zhangdan_id
+    </sql>
+
+    <sql id="ComputedZhuangtai">
+        case
+            when fz.zhuangtai = '已取消' then '已取消'
+            when coalesce(jf.yijiao_jine, 0) = 0 then '待缴费'
+            when coalesce(jf.yijiao_jine, 0) >= coalesce(fz.zongjine, 0) then '已结清'
+            else '部分缴费'
+        end
+    </sql>
+
+    <select id="findZhangdanList" resultType="map">
+        select
+        <include refid="ZhangdanColumns"/>
+        <include refid="ZhangdanFrom"/>
+        <where>
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="zhangdanYuefen != null and zhangdanYuefen != ''">
+                and fz.zhangdan_yuefen = #{zhangdanYuefen}
+            </if>
+            <if test="zhuangtai != null and zhuangtai != ''">
+                and <include refid="ComputedZhuangtai"/> = #{zhuangtai}
+            </if>
+        </where>
+        order by fz.zhangdan_yuefen desc, fz.id desc
+    </select>
+
+    <select id="findZhangdanById" resultType="map">
+        select
+        <include refid="ZhangdanColumns"/>
+        <include refid="ZhangdanFrom"/>
+        where fz.id = #{id}
+    </select>
+
+    <insert id="insertZhangdan">
+        insert into feiyong_zhangdan (
+            laoren_id, zhangdan_yuefen, chuangwei_fei, huli_fei,
+            yaopin_fei, qita_fei, zongjine, zhuangtai, beizhu
+        ) values (
+            #{laorenId}, #{zhangdanYuefen}, #{chuangweiFei}, #{huliFei},
+            #{yaopinFei}, #{qitaFei}, #{zongjine}, #{zhuangtai}, #{beizhu}
+        )
+    </insert>
+
+    <update id="updateZhangdan">
+        update feiyong_zhangdan
+        set laoren_id = #{laorenId},
+            zhangdan_yuefen = #{zhangdanYuefen},
+            chuangwei_fei = #{chuangweiFei},
+            huli_fei = #{huliFei},
+            yaopin_fei = #{yaopinFei},
+            qita_fei = #{qitaFei},
+            zongjine = #{zongjine},
+            zhuangtai = #{zhuangtai},
+            beizhu = #{beizhu}
+        where id = #{id}
+    </update>
+
+    <update id="cancelZhangdan">
+        update feiyong_zhangdan
+        set zhuangtai = '已取消'
+        where id = #{id}
+    </update>
+
+    <select id="sumJiaofeiByZhangdanId" resultType="java.math.BigDecimal">
+        select coalesce(sum(jiaofei_jine), 0)
+        from jiaofei_jilu
+        where zhangdan_id = #{zhangdanId}
+    </select>
+
+    <select id="findJiaofeiList" resultType="map">
+        select
+            jf.id,
+            jf.zhangdan_id as zhangdanId,
+            jf.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            fz.zhangdan_yuefen as zhangdanYuefen,
+            jf.jiaofei_jine as jiaofeiJine,
+            jf.jiaofei_fangshi as jiaofeiFangshi,
+            jf.jiaofei_shijian as jiaofeiShijian,
+            jf.caozuoren_id as caozuorenId,
+            y.xingming as caozuorenXingming,
+            jf.beizhu
+        from jiaofei_jilu jf
+        join feiyong_zhangdan fz on jf.zhangdan_id = fz.id
+        join laoren_xinxi l on jf.laoren_id = l.id
+        left join xitong_yonghu y on jf.caozuoren_id = y.id
+        <where>
+            <if test="zhangdanId != null">
+                and jf.zhangdan_id = #{zhangdanId}
+            </if>
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="zhangdanYuefen != null and zhangdanYuefen != ''">
+                and fz.zhangdan_yuefen = #{zhangdanYuefen}
+            </if>
+        </where>
+        order by jf.jiaofei_shijian desc, jf.id desc
+    </select>
+
+    <select id="findJiaofeiById" resultType="map">
+        select id, zhangdan_id as zhangdanId, laoren_id as laorenId, jiaofei_jine as jiaofeiJine
+        from jiaofei_jilu
+        where id = #{id}
+    </select>
+
+    <insert id="insertJiaofei">
+        insert into jiaofei_jilu (
+            zhangdan_id, laoren_id, jiaofei_jine, jiaofei_fangshi,
+            jiaofei_shijian, caozuoren_id, beizhu
+        ) values (
+            #{zhangdanId}, #{laorenId}, #{jiaofeiJine}, #{jiaofeiFangshi},
+            coalesce(#{jiaofeiShijian}, now()), #{caozuorenId}, #{beizhu}
+        )
+    </insert>
+
+    <delete id="deleteJiaofei">
+        delete from jiaofei_jilu where id = #{id}
+    </delete>
+
+    <update id="updateZhangdanZhuangtai">
+        update feiyong_zhangdan
+        set zhuangtai = #{zhuangtai}
+        where id = #{id}
+          and zhuangtai != '已取消'
+    </update>
+</mapper>

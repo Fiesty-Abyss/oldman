@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.huliguanli.mapper.HuliJibieMapper">
+    <select id="findList" resultType="map">
+        select
+            id,
+            jibie_bianhao as jibieBianhao,
+            jibie_mingcheng as jibieMingcheng,
+            yue_feiyong as yueFeiyong,
+            zhuangtai,
+            miaoshu
+        from huli_jibie
+        <where>
+            zhuangtai != '已删除'
+            <if test="jibieMingcheng != null and jibieMingcheng != ''">
+                and jibie_mingcheng like concat('%', #{jibieMingcheng}, '%')
+            </if>
+            <if test="zhuangtai != null and zhuangtai != ''">
+                and zhuangtai = #{zhuangtai}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="findById" resultType="map">
+        select
+            id,
+            jibie_bianhao as jibieBianhao,
+            jibie_mingcheng as jibieMingcheng,
+            yue_feiyong as yueFeiyong,
+            zhuangtai,
+            miaoshu
+        from huli_jibie
+        where id = #{id}
+          and zhuangtai != '已删除'
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into huli_jibie (
+            jibie_bianhao, jibie_mingcheng, yue_feiyong, zhuangtai, miaoshu
+        ) values (
+            #{jibieBianhao}, #{jibieMingcheng}, coalesce(#{yueFeiyong}, 0), coalesce(#{zhuangtai}, '启用'), #{miaoshu}
+        )
+    </insert>
+
+    <update id="update">
+        update huli_jibie
+        set
+            jibie_bianhao = #{jibieBianhao},
+            jibie_mingcheng = #{jibieMingcheng},
+            yue_feiyong = #{yueFeiyong},
+            zhuangtai = #{zhuangtai},
+            miaoshu = #{miaoshu}
+        where id = #{id}
+    </update>
+
+    <update id="changeStatus">
+        update huli_jibie set zhuangtai = #{zhuangtai} where id = #{id}
+    </update>
+
+    <update id="deleteLogic">
+        update huli_jibie set zhuangtai = '已删除' where id = #{id}
+    </update>
+
+    <insert id="bindXiangmu">
+        insert ignore into jibie_xiangmu (jibie_id, xiangmu_id)
+        values (#{jibieId}, #{xiangmuId})
+    </insert>
+
+    <delete id="unbindXiangmu">
+        delete from jibie_xiangmu
+        where jibie_id = #{jibieId}
+          and xiangmu_id = #{xiangmuId}
+    </delete>
+
+    <delete id="deleteXiangmuBindings">
+        delete from jibie_xiangmu where jibie_id = #{jibieId}
+    </delete>
+</mapper>

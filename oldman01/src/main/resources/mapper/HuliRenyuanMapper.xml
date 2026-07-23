@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.huli.mapper.HuliRenyuanMapper">
+    <select id="findAll" resultType="map">
+        select
+            id,
+            yonghu_id as yonghuId,
+            gonghao,
+            xingming,
+            xingbie,
+            shouji,
+            zhicheng,
+            ruzhi_riqi as ruzhiRiqi,
+            zhuangtai,
+            beizhu
+        from huli_renyuan
+        where zhuangtai != '离职'
+        order by id desc
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into huli_renyuan (
+            yonghu_id, gonghao, xingming, xingbie, shouji, zhicheng, ruzhi_riqi, zhuangtai, beizhu
+        ) values (
+            #{yonghuId}, #{gonghao}, #{xingming}, #{xingbie}, #{shouji}, #{zhicheng}, #{ruzhiRiqi}, coalesce(#{zhuangtai}, '在职'), #{beizhu}
+        )
+    </insert>
+
+    <update id="update">
+        update huli_renyuan
+        set
+            yonghu_id = #{yonghuId},
+            gonghao = #{gonghao},
+            xingming = #{xingming},
+            xingbie = #{xingbie},
+            shouji = #{shouji},
+            zhicheng = #{zhicheng},
+            ruzhi_riqi = #{ruzhiRiqi},
+            zhuangtai = #{zhuangtai},
+            beizhu = #{beizhu}
+        where id = #{id}
+    </update>
+
+    <update id="deleteLogic">
+        update huli_renyuan set zhuangtai = '离职' where id = #{id}
+    </update>
+
+    <select id="findFuwuLaoren" resultType="map">
+        select
+            rl.id as guanxiId,
+            rl.huli_renyuan_id as huliRenyuanId,
+            rl.laoren_id as laorenId,
+            l.laoren_bianhao as laorenBianhao,
+            l.xingming as laorenXingming,
+            rl.kaishi_riqi as kaishiRiqi,
+            rl.jieshu_riqi as jieshuRiqi,
+            rl.zhuangtai,
+            rl.beizhu
+        from renyuan_laoren rl
+        join laoren_xinxi l on rl.laoren_id = l.id
+        where rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+        order by rl.id desc
+    </select>
+
+    <select id="findUnassignedLaorenOptions" resultType="map">
+        select
+            l.id,
+            l.laoren_bianhao as laorenBianhao,
+            l.xingming,
+            l.xingbie,
+            l.nianling,
+            l.ruzhu_zhuangtai as ruzhuZhuangtai
+        from laoren_xinxi l
+        where l.ruzhu_zhuangtai != '已删除'
+          and not exists (
+              select 1
+              from renyuan_laoren rl
+              where rl.laoren_id = l.id
+                and rl.huli_renyuan_id = #{huliRenyuanId}
+                and rl.zhuangtai = '服务中'
+          )
+        <if test="laorenXingming != null and laorenXingming != ''">
+            and l.xingming like concat('%', #{laorenXingming}, '%')
+        </if>
+        order by l.id desc
+    </select>
+
+    <select id="countServingAssignment" resultType="int">
+        select count(1)
+        from renyuan_laoren
+        where huli_renyuan_id = #{huliRenyuanId}
+          and laoren_id = #{laorenId}
+          and zhuangtai = '服务中'
+    </select>
+
+    <update id="endLaorenAssignment">
+        update renyuan_laoren
+        set zhuangtai = '已结束',
+            jieshu_riqi = curdate()
+        where huli_renyuan_id = #{huliRenyuanId}
+          and laoren_id = #{laorenId}
+          and zhuangtai = '服务中'
+    </update>
+
+    <insert id="assignLaoren">
+        insert into renyuan_laoren (
+            huli_renyuan_id, laoren_id, kaishi_riqi, zhuangtai, beizhu
+        ) values (
+            #{huliRenyuanId}, #{laorenId}, coalesce(#{kaishiRiqi}, curdate()), '服务中', #{beizhu}
+        )
+    </insert>
+</mapper>

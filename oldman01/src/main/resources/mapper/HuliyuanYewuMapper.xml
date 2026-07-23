@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.huliyuan.mapper.HuliyuanYewuMapper">
+    <select id="findHuliRenyuanByYonghuId" resultType="map">
+        select id, yonghu_id as yonghuId, gonghao, xingming
+        from huli_renyuan
+        where yonghu_id = #{yonghuId}
+          and zhuangtai != '离职'
+        limit 1
+    </select>
+
+    <select id="countFuwuLaoren" resultType="int">
+        select count(1)
+        from renyuan_laoren
+        where huli_renyuan_id = #{huliRenyuanId}
+          and laoren_id = #{laorenId}
+          and zhuangtai = '服务中'
+    </select>
+
+    <select id="countWodeLaoren" resultType="int">
+        select count(distinct rl.laoren_id)
+        from renyuan_laoren rl
+        join laoren_xinxi l on rl.laoren_id = l.id
+        where rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+          and l.ruzhu_zhuangtai != '已删除'
+    </select>
+
+    <select id="countJinriHuliJilu" resultType="int">
+        select count(1)
+        from huli_jilu
+        where huli_renyuan_id = #{huliRenyuanId}
+          and zhuangtai != '取消'
+          and date(huli_shijian) = curdate()
+    </select>
+
+    <select id="countJinriJiankangJiance" resultType="int">
+        select count(1)
+        from jiankang_jiance
+        where huli_renyuan_id = #{huliRenyuanId}
+          and date(jiance_shijian) = curdate()
+    </select>
+
+    <select id="countJinriFuyao" resultType="int">
+        select count(1)
+        from fuyao_jilu
+        where huli_renyuan_id = #{huliRenyuanId}
+          and date(coalesce(shiji_shijian, jihua_shijian)) = curdate()
+    </select>
+
+    <select id="countWoTijiaoDaishenpiWaichu" resultType="int">
+        select count(1)
+        from waichu_shenqing
+        where shenqing_ren_leixing = '护理员'
+          and shenqing_ren_id = #{huliRenyuanId}
+          and shenpi_zhuangtai = '待审批'
+    </select>
+
+    <select id="countWoTijiaoDaishenpiTuizhu" resultType="int">
+        select count(1)
+        from tuizhu_shenqing
+        where shenqing_ren_leixing = '护理员'
+          and shenqing_ren_id = #{huliRenyuanId}
+          and shenpi_zhuangtai = '待审批'
+    </select>
+
+    <select id="findLaorenList" resultType="map">
+        select distinct
+            l.id as laorenId,
+            l.laoren_bianhao as laorenBianhao,
+            l.xingming as laorenXingming,
+            l.touxiang,
+            l.xingbie,
+            l.nianling,
+            l.laoren_leixing as laorenLeixing,
+            l.ruzhu_zhuangtai as ruzhuZhuangtai,
+            l.lianxi_dianhua as lianxiDianhua,
+            l.jiating_zhuzhi as jiatingZhuzhi,
+            l.beizhu,
+            concat(coalesce(f.fangjianhao, '-'), ' / ', coalesce(c.chuangweihao, '-')) as chuangwei,
+            hj.jibie_mingcheng as jibieMingcheng
+        from renyuan_laoren rl
+        join laoren_xinxi l on rl.laoren_id = l.id
+        left join chuangwei_shiyong cs on l.id = cs.laoren_id and cs.shiyong_zhuangtai = '正在使用'
+        left join fangjian_xinxi f on cs.fangjian_id = f.id
+        left join chuangwei_xinxi c on cs.chuangwei_id = c.id
+        left join laoren_huli lh on l.id = lh.laoren_id and lh.zhuangtai = '生效'
+        left join huli_jibie hj on lh.jibie_id = hj.id
+        where rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+          and l.ruzhu_zhuangtai != '已删除'
+        <if test="laorenXingming != null and laorenXingming != ''">
+          and l.xingming like concat('%', #{laorenXingming}, '%')
+        </if>
+        order by l.id desc
+    </select>
+
+    <select id="findLaorenDetail" resultType="map">
+        select distinct
+            l.id as laorenId,
+            l.laoren_bianhao as laorenBianhao,
+            l.xingming as laorenXingming,
+            l.touxiang,
+            l.xingbie,
+            l.nianling,
+            l.laoren_leixing as laorenLeixing,
+            l.ruzhu_zhuangtai as ruzhuZhuangtai,
+            l.lianxi_dianhua as lianxiDianhua,
+            l.jiating_zhuzhi as jiatingZhuzhi,
+            l.beizhu,
+            concat(coalesce(f.loudong, ''), coalesce(f.fangjianhao, '-'), ' / ', coalesce(c.chuangweihao, '-')) as chuangwei,
+            hj.jibie_mingcheng as jibieMingcheng
+        from renyuan_laoren rl
+        join laoren_xinxi l on rl.laoren_id = l.id
+        left join chuangwei_shiyong cs on l.id = cs.laoren_id and cs.shiyong_zhuangtai = '正在使用'
+        left join fangjian_xinxi f on cs.fangjian_id = f.id
+        left join chuangwei_xinxi c on cs.chuangwei_id = c.id
+        left join laoren_huli lh on l.id = lh.laoren_id and lh.zhuangtai = '生效'
+        left join huli_jibie hj on lh.jibie_id = hj.id
+        where rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.laoren_id = #{laorenId}
+          and rl.zhuangtai = '服务中'
+          and l.ruzhu_zhuangtai != '已删除'
+        limit 1
+    </select>
+
+    <select id="findLaorenHuliXiangmuList" resultType="map">
+        select
+            x.id,
+            x.xiangmu_bianhao as xiangmuBianhao,
+            x.xiangmu_mingcheng as xiangmuMingcheng,
+            x.jiage,
+            x.zhixing_zhouqi as zhixingZhouqi,
+            x.zhixing_cishu as zhixingCishu,
+            x.danwei
+        from laoren_huli lh
+        join jibie_xiangmu jx on lh.jibie_id = jx.jibie_id
+        join huli_xiangmu x on jx.xiangmu_id = x.id
+        join renyuan_laoren rl on lh.laoren_id = rl.laoren_id
+        where lh.laoren_id = #{laorenId}
+          and lh.zhuangtai = '生效'
+          and x.zhuangtai = '启用'
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+        order by x.id desc
+    </select>
+
+    <select id="countLaorenHuliXiangmu" resultType="int">
+        select count(1)
+        from laoren_huli lh
+        join jibie_xiangmu jx on lh.jibie_id = jx.jibie_id
+        join huli_xiangmu x on jx.xiangmu_id = x.id
+        join renyuan_laoren rl on lh.laoren_id = rl.laoren_id
+        where lh.laoren_id = #{laorenId}
+          and jx.xiangmu_id = #{xiangmuId}
+          and lh.zhuangtai = '生效'
+          and x.zhuangtai = '启用'
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+    </select>
+
+    <select id="findHuliJiluList" resultType="map">
+        select
+            hj.id,
+            hj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            hj.xiangmu_id as xiangmuId,
+            x.xiangmu_mingcheng as xiangmuMingcheng,
+            hj.huli_shijian as huliShijian,
+            hj.huli_shuliang as huliShuliang,
+            hj.huli_neirong as huliNeirong,
+            hj.laoren_fankui as laorenFankui,
+            hj.zhuangtai
+        from huli_jilu hj
+        join laoren_xinxi l on hj.laoren_id = l.id
+        join huli_xiangmu x on hj.xiangmu_id = x.id
+        join renyuan_laoren rl on hj.laoren_id = rl.laoren_id
+        where hj.huli_renyuan_id = #{huliRenyuanId}
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+          and hj.zhuangtai != '取消'
+        <if test="laorenId != null">
+          and hj.laoren_id = #{laorenId}
+        </if>
+        order by hj.huli_shijian desc, hj.id desc
+    </select>
+
+    <insert id="insertHuliJilu">
+        insert into huli_jilu (
+            laoren_id, huli_renyuan_id, xiangmu_id, huli_shijian,
+            huli_shuliang, huli_neirong, laoren_fankui, zhuangtai
+        ) values (
+            #{laorenId}, #{huliRenyuanId}, #{xiangmuId}, coalesce(#{huliShijian}, now()),
+            coalesce(#{huliShuliang}, 1), #{huliNeirong}, #{laorenFankui}, coalesce(#{zhuangtai}, '已完成')
+        )
+    </insert>
+
+    <update id="deleteHuliJilu">
+        update huli_jilu
+        set zhuangtai = '取消'
+        where id = #{id}
+          and huli_renyuan_id = #{huliRenyuanId}
+    </update>
+
+    <select id="findJiankangJianceList" resultType="map">
+        select
+            jj.id,
+            jj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            jj.jiance_shijian as jianceShijian,
+            jj.tiwen,
+            jj.gaoya,
+            jj.diya,
+            jj.xinlv,
+            jj.xueyang,
+            jj.xuetang,
+            jj.qingkuang
+        from jiankang_jiance jj
+        join laoren_xinxi l on jj.laoren_id = l.id
+        join renyuan_laoren rl on jj.laoren_id = rl.laoren_id
+        where jj.huli_renyuan_id = #{huliRenyuanId}
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+        <if test="laorenId != null">
+          and jj.laoren_id = #{laorenId}
+        </if>
+        order by jj.jiance_shijian desc, jj.id desc
+    </select>
+
+    <insert id="insertJiankangJiance">
+        insert into jiankang_jiance (
+            laoren_id, huli_renyuan_id, jiance_shijian,
+            tiwen, gaoya, diya, xinlv, xueyang, xuetang, qingkuang
+        ) values (
+            #{laorenId}, #{huliRenyuanId}, coalesce(#{jianceShijian}, now()),
+            #{tiwen}, #{gaoya}, #{diya}, #{xinlv}, #{xueyang}, #{xuetang}, #{qingkuang}
+        )
+    </insert>
+
+    <select id="findYongyaoJihuaList" resultType="map">
+        select
+            yj.id,
+            yj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            yj.yaopin_id as yaopinId,
+            yp.yaopin_mingcheng as yaopinMingcheng,
+            yp.guige,
+            yj.kaishi_riqi as kaishiRiqi,
+            yj.jieshu_riqi as jieshuRiqi,
+            yj.yongfa,
+            yj.meiri_cishu as meiriCishu,
+            yj.meici_yongliang as meiciYongliang,
+            yj.yongyao_shijian as yongyaoShijian,
+            yj.yizhu,
+            yj.zhuangtai
+        from yongyao_jihua yj
+        join yaopin_xinxi yp on yj.yaopin_id = yp.id
+        join laoren_xinxi l on yj.laoren_id = l.id
+        join renyuan_laoren rl on yj.laoren_id = rl.laoren_id
+        where rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+        <if test="laorenId != null">
+          and yj.laoren_id = #{laorenId}
+        </if>
+        order by yj.id desc
+    </select>
+
+    <select id="findYongyaoJihuaForHuli" resultType="map">
+        select yj.id, yj.laoren_id as laorenId, yj.yaopin_id as yaopinId
+        from yongyao_jihua yj
+        join renyuan_laoren rl on yj.laoren_id = rl.laoren_id
+        where yj.id = #{jihuaId}
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+        limit 1
+    </select>
+
+    <select id="findFuyaoJiluList" resultType="map">
+        select
+            fj.id,
+            fj.jihua_id as jihuaId,
+            fj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            fj.yaopin_id as yaopinId,
+            yp.yaopin_mingcheng as yaopinMingcheng,
+            fj.jihua_shijian as jihuaShijian,
+            fj.shiji_shijian as shijiShijian,
+            fj.zhixing_zhuangtai as zhixingZhuangtai,
+            fj.beizhu
+        from fuyao_jilu fj
+        join laoren_xinxi l on fj.laoren_id = l.id
+        join yaopin_xinxi yp on fj.yaopin_id = yp.id
+        join renyuan_laoren rl on fj.laoren_id = rl.laoren_id
+        where fj.huli_renyuan_id = #{huliRenyuanId}
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+        <if test="laorenId != null">
+          and fj.laoren_id = #{laorenId}
+        </if>
+        order by fj.jihua_shijian desc, fj.id desc
+    </select>
+
+    <insert id="insertFuyaoJilu">
+        insert into fuyao_jilu (
+            jihua_id, laoren_id, yaopin_id, huli_renyuan_id,
+            jihua_shijian, shiji_shijian, zhixing_zhuangtai, beizhu
+        ) values (
+            #{jihuaId}, #{laorenId}, #{yaopinId}, #{huliRenyuanId},
+            coalesce(#{jihuaShijian}, now()), #{shijiShijian}, coalesce(#{zhixingZhuangtai}, '已服药'), #{beizhu}
+        )
+    </insert>
+
+    <select id="findWaichuList" resultType="map">
+        select
+            ws.id,
+            ws.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            ws.waichu_shiyou as waichuShiyou,
+            ws.waichu_shijian as waichuShijian,
+            ws.yuji_huiyuan_shijian as yujiHuiyuanShijian,
+            ws.peitong_ren as peitongRen,
+            ws.peitong_dianhua as peitongDianhua,
+            ws.shenqing_ren_id as shenqingRenId,
+            coalesce(ws.shenqing_ren_leixing, '历史数据') as shenqingRenLeixing,
+            coalesce(ws.shenqing_ren_xingming, '') as shenqingRenXingming,
+            ws.shenpi_zhuangtai as shenpiZhuangtai,
+            ws.shenpi_yijian as shenpiYijian
+        from waichu_shenqing ws
+        join laoren_xinxi l on ws.laoren_id = l.id
+        join renyuan_laoren rl on ws.laoren_id = rl.laoren_id
+        where ws.huli_renyuan_id = #{huliRenyuanId}
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+          and coalesce(ws.shanchu_zhuangtai, '正常') = '正常'
+        <if test="laorenId != null">
+          and ws.laoren_id = #{laorenId}
+        </if>
+        order by ws.waichu_shijian desc, ws.id desc
+    </select>
+
+    <insert id="insertWaichu">
+        insert into waichu_shenqing (
+            laoren_id, huli_renyuan_id, waichu_shiyou, waichu_shijian,
+            yuji_huiyuan_shijian, peitong_ren, peitong_dianhua,
+            shenqing_ren_id, shenqing_ren_leixing, shenqing_ren_xingming, shenpi_zhuangtai
+        ) values (
+            #{laorenId}, #{huliRenyuanId}, #{waichuShiyou}, coalesce(#{waichuShijian}, now()),
+            #{yujiHuiyuanShijian}, #{peitongRen}, #{peitongDianhua},
+            #{shenqingRenId}, #{shenqingRenLeixing}, #{shenqingRenXingming}, '待审批'
+        )
+    </insert>
+
+    <select id="findTuizhuList" resultType="map">
+        select
+            ts.id,
+            ts.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            ts.tuizhu_leixing as tuizhuLeixing,
+            ts.tuizhu_yuanyin as tuizhuYuanyin,
+            ts.tuizhu_shijian as tuizhuShijian,
+            ts.shenqing_ren_id as shenqingRenId,
+            coalesce(ts.shenqing_ren_leixing, '历史数据') as shenqingRenLeixing,
+            coalesce(ts.shenqing_ren_xingming, '') as shenqingRenXingming,
+            ts.shenpi_zhuangtai as shenpiZhuangtai,
+            ts.shenpi_yijian as shenpiYijian
+        from tuizhu_shenqing ts
+        join laoren_xinxi l on ts.laoren_id = l.id
+        join renyuan_laoren rl on ts.laoren_id = rl.laoren_id
+        where ts.huli_renyuan_id = #{huliRenyuanId}
+          and rl.huli_renyuan_id = #{huliRenyuanId}
+          and rl.zhuangtai = '服务中'
+          and coalesce(ts.shanchu_zhuangtai, '正常') = '正常'
+        <if test="laorenId != null">
+          and ts.laoren_id = #{laorenId}
+        </if>
+        order by ts.tuizhu_shijian desc, ts.id desc
+    </select>
+
+    <insert id="insertTuizhu">
+        insert into tuizhu_shenqing (
+            laoren_id, huli_renyuan_id, tuizhu_leixing,
+            tuizhu_yuanyin, tuizhu_shijian,
+            shenqing_ren_id, shenqing_ren_leixing, shenqing_ren_xingming, shenpi_zhuangtai
+        ) values (
+            #{laorenId}, #{huliRenyuanId}, coalesce(#{tuizhuLeixing}, '正常退住'),
+            #{tuizhuYuanyin}, #{tuizhuShijian},
+            #{shenqingRenId}, #{shenqingRenLeixing}, #{shenqingRenXingming}, '待审批'
+        )
+    </insert>
+</mapper>

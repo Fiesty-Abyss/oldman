@@ -1,0 +1,32 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Build / deps
+**/target/
+**/node_modules/
+**/dist/
+*.class
+*.jar
+*.war
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env / secrets (keep example files if any)
+.env
+.env.*
+!.env.example
+
+# Local junk / duplicates
+新建文件夹/
+
+# Logs
+*.log
+**/vite-*.log

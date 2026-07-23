@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.gongkai.mapper.GongkaiMapper">
+    <select id="countYonghuByZhanghao" resultType="int">
+        select count(1)
+        from xitong_yonghu
+        where denglu_zhanghao = #{dengluZhanghao}
+    </select>
+
+    <select id="countPhone" resultType="int">
+        select (
+            select count(1) from xitong_yonghu where shouji = #{shouji}
+        ) + (
+            select count(1) from jiashu_xinxi where shouji = #{shouji}
+        )
+    </select>
+
+    <select id="findJueseIdByBianma" resultType="long">
+        select id
+        from xitong_juese
+        where juese_bianma = #{jueseBianma}
+        limit 1
+    </select>
+
+    <insert id="insertLaoren" parameterType="map" useGeneratedKeys="true" keyProperty="id">
+        insert into laoren_xinxi (
+            laoren_bianhao, xingming, xingbie, chusheng_riqi, nianling, shenfenzheng,
+            xuexing, laoren_leixing, ruzhu_zhuangtai, lianxi_dianhua, jiating_zhuzhi, beizhu
+        ) values (
+            #{laorenBianhao}, #{laorenXingming}, #{xingbie}, #{chushengRiqi}, #{nianling}, #{shenfenzhenghao},
+            #{xuexing}, #{laorenLeixing}, #{ruzhuZhuangtai}, #{lianxiDianhua}, #{jiatingZhuzhi}, #{beizhu}
+        )
+    </insert>
+
+    <insert id="insertYonghu" parameterType="map" useGeneratedKeys="true" keyProperty="yonghuId">
+        insert into xitong_yonghu (
+            denglu_zhanghao, mima, xingming, shouji, touxiang, zhuangtai
+        ) values (
+            #{dengluZhanghao}, #{mima}, #{jiashuXingming}, #{shouji}, '/uploads/avatar/family-default.jpg', '启用'
+        )
+    </insert>
+
+    <insert id="insertYonghuJuese">
+        insert into yonghu_juese (yonghu_id, juese_id)
+        values (#{yonghuId}, #{jueseId})
+    </insert>
+
+    <insert id="insertJiashu" parameterType="map">
+        insert into jiashu_xinxi (
+            laoren_id, xingming, guanxi, shouji, dizhi, shi_moren, beizhu
+        ) values (
+            #{laorenId}, #{jiashuXingming}, #{guanxi}, #{shouji}, #{dizhi}, 1, #{beizhu}
+        )
+    </insert>
+
+    <insert id="insertRuzhuShenqing" parameterType="map">
+        insert into ruzhu_shenqing (
+            laoren_xingming, xingbie, chusheng_riqi, nianling, shenfenzhenghao, lianxi_dianhua,
+            jiating_zhuzhi, xuexing, guominshi, jiwangbingshi, huli_xuqiu, qiwang_ruzhu_shijian,
+            jiashu_xingming, jiashu_shouji, yu_laoren_guanxi, shenqing_zhuangtai, beizhu
+        ) values (
+            #{laorenXingming}, #{xingbie}, #{chushengRiqi}, #{nianling}, #{shenfenzhenghao}, #{lianxiDianhua},
+            #{jiatingZhuzhi}, #{xuexing}, #{guominshi}, #{jiwangbingshi}, #{huliXuqiu}, #{qiwangRuzhuShijian},
+            #{jiashuXingming}, #{jiashuShouji}, #{yuLaorenGuanxi}, '待审核', #{beizhu}
+        )
+    </insert>
+    <insert id="insertZanzhuYixiang" parameterType="map">
+        insert into zanzhu_yixiang (
+            xingming, lianxi_dianhua, zanzhu_fangshi, zanzhu_shuoming, beizhu,
+            chuli_zhuangtai, shanchu_zhuangtai
+        ) values (
+            #{xingming}, #{lianxiDianhua}, #{zanzhuFangshi}, #{zanzhuShuoming}, #{beizhu},
+            '待联系', '正常'
+        )
+    </insert>
+</mapper>

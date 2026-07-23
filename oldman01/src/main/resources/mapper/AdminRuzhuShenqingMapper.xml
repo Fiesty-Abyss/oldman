@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.admin.mapper.AdminRuzhuShenqingMapper">
+    <sql id="RuzhuShenqingColumns">
+        id,
+        laoren_id as laorenId,
+        laoren_xingming as laorenXingming,
+        xingbie,
+        chusheng_riqi as chushengRiqi,
+        nianling,
+        shenfenzhenghao,
+        lianxi_dianhua as lianxiDianhua,
+        jiating_zhuzhi as jiatingZhuzhi,
+        xuexing,
+        guominshi,
+        jiwangbingshi,
+        huli_xuqiu as huliXuqiu,
+        qiwang_ruzhu_shijian as qiwangRuzhuShijian,
+        jiashu_xingming as jiashuXingming,
+        jiashu_shouji as jiashuShouji,
+        yu_laoren_guanxi as yuLaorenGuanxi,
+        shenqing_zhuangtai as shenqingZhuangtai,
+        coalesce(banli_zhuangtai, '未办理') as banliZhuangtai,
+        shenhe_ren_id as shenheRenId,
+        shenhe_ren_xingming as shenheRenXingming,
+        shenhe_shijian as shenheShijian,
+        shenhe_yijian as shenheYijian,
+        beizhu,
+        chuangjian_shijian as chuangjianShijian,
+        gengxin_shijian as gengxinShijian
+    </sql>
+
+    <select id="findList" resultType="map">
+        select
+        <include refid="RuzhuShenqingColumns"/>
+        from ruzhu_shenqing
+        where shanchu_zhuangtai = '正常'
+        <if test="laorenXingming != null and laorenXingming != ''">
+            and laoren_xingming like concat('%', #{laorenXingming}, '%')
+        </if>
+        <if test="jiashuShouji != null and jiashuShouji != ''">
+            and jiashu_shouji like concat('%', #{jiashuShouji}, '%')
+        </if>
+        <if test="shenqingZhuangtai != null and shenqingZhuangtai != ''">
+            and shenqing_zhuangtai = #{shenqingZhuangtai}
+        </if>
+        order by chuangjian_shijian desc, id desc
+    </select>
+
+    <select id="findById" resultType="map">
+        select
+        <include refid="RuzhuShenqingColumns"/>
+        from ruzhu_shenqing
+        where id = #{id}
+          and shanchu_zhuangtai = '正常'
+    </select>
+
+    <select id="findPassedUnbanliList" resultType="map">
+        select
+        <include refid="RuzhuShenqingColumns"/>
+        from ruzhu_shenqing
+        where shanchu_zhuangtai = '正常'
+          and shenqing_zhuangtai = '已通过'
+          and coalesce(banli_zhuangtai, '未办理') = '未办理'
+          and laoren_id is not null
+        <if test="laorenXingming != null and laorenXingming != ''">
+            and laoren_xingming like concat('%', #{laorenXingming}, '%')
+        </if>
+        <if test="jiashuShouji != null and jiashuShouji != ''">
+            and jiashu_shouji like concat('%', #{jiashuShouji}, '%')
+        </if>
+        order by shenhe_shijian desc, id desc
+    </select>
+
+    <select id="findYonghuXingming" resultType="string">
+        select xingming
+        from xitong_yonghu
+        where id = #{id}
+    </select>
+
+    <update id="updateShenhe">
+        update ruzhu_shenqing
+        set shenqing_zhuangtai = #{shenqingZhuangtai},
+            shenhe_ren_id = #{shenheRenId},
+            shenhe_ren_xingming = #{shenheRenXingming},
+            shenhe_shijian = now(),
+            shenhe_yijian = #{shenheYijian}
+        where id = #{id}
+    </update>
+
+    <update id="updateLaorenId">
+        update ruzhu_shenqing
+        set laoren_id = #{laorenId},
+            banli_zhuangtai = coalesce(banli_zhuangtai, '未办理')
+        where id = #{id}
+    </update>
+
+    <select id="findLaorenIdByShenfenzheng" resultType="long">
+        select id
+        from laoren_xinxi
+        where shenfenzheng = #{shenfenzheng}
+          and ruzhu_zhuangtai != '已删除'
+        limit 1
+    </select>
+
+    <select id="findLaorenIdByNameAndPhone" resultType="long">
+        select id
+        from laoren_xinxi
+        where xingming = #{laorenXingming}
+        <if test="lianxiDianhua != null and lianxiDianhua != ''">
+            and lianxi_dianhua = #{lianxiDianhua}
+        </if>
+          and ruzhu_zhuangtai != '已删除'
+        order by id desc
+        limit 1
+    </select>
+
+    <insert id="insertLaoren" parameterType="map" useGeneratedKeys="true" keyProperty="laorenId">
+        insert into laoren_xinxi (
+            laoren_bianhao, xingming, xingbie, chusheng_riqi, nianling, shenfenzheng,
+            xuexing, laoren_leixing, ruzhu_zhuangtai, lianxi_dianhua, jiating_zhuzhi, beizhu
+        ) values (
+            #{laorenBianhao}, #{laorenXingming}, #{xingbie}, #{chushengRiqi}, #{nianling}, #{shenfenzhenghao},
+            #{xuexing}, #{laorenLeixing}, '未入住', #{lianxiDianhua}, #{jiatingZhuzhi},
+            concat_ws('；',
+                nullif(concat('过敏史：', ifnull(#{guominshi}, '')), '过敏史：'),
+                nullif(concat('既往病史：', ifnull(#{jiwangbingshi}, '')), '既往病史：'),
+                nullif(concat('护理需求：', ifnull(#{huliXuqiu}, '')), '护理需求：'),
+                nullif(#{beizhu}, '')
+            )
+        )
+    </insert>
+
+    <update id="updateLaorenBase">
+        update laoren_xinxi
+        set xingbie = #{shenqing.xingbie},
+            chusheng_riqi = #{shenqing.chushengRiqi},
+            nianling = #{shenqing.nianling},
+            xuexing = #{shenqing.xuexing},
+            lianxi_dianhua = #{shenqing.lianxiDianhua},
+            jiating_zhuzhi = #{shenqing.jiatingZhuzhi},
+            beizhu = concat_ws('；',
+                nullif(concat('过敏史：', ifnull(#{shenqing.guominshi}, '')), '过敏史：'),
+                nullif(concat('既往病史：', ifnull(#{shenqing.jiwangbingshi}, '')), '既往病史：'),
+                nullif(concat('护理需求：', ifnull(#{shenqing.huliXuqiu}, '')), '护理需求：'),
+                nullif(#{shenqing.beizhu}, '')
+            )
+        where id = #{laorenId}
+    </update>
+
+    <select id="findJiashuId" resultType="long">
+        select id
+        from jiashu_xinxi
+        where laoren_id = #{laorenId}
+          and shouji = #{shouji}
+        limit 1
+    </select>
+
+    <insert id="insertJiashu">
+        insert into jiashu_xinxi (
+            laoren_id, xingming, guanxi, shouji, dizhi, shi_moren, beizhu
+        ) values (
+            #{laorenId}, #{shenqing.jiashuXingming}, #{shenqing.yuLaorenGuanxi},
+            #{shenqing.jiashuShouji}, #{shenqing.jiatingZhuzhi}, 1, '入住申请审核通过后创建'
+        )
+    </insert>
+
+    <update id="updateJiashu">
+        update jiashu_xinxi
+        set xingming = #{shenqing.jiashuXingming},
+            guanxi = #{shenqing.yuLaorenGuanxi},
+            dizhi = #{shenqing.jiatingZhuzhi}
+        where id = #{jiashuId}
+    </update>
+
+    <update id="deleteLogic">
+        update ruzhu_shenqing
+        set shanchu_zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.admin.mapper.AdminJiluMapper">
+    <select id="findHuliList" resultType="map">
+        select
+            hj.id,
+            hj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            hr.xingming as huliRenyuanXingming,
+            hx.xiangmu_mingcheng as xiangmuMingcheng,
+            hj.huli_shijian as huliShijian,
+            hj.huli_shuliang as huliShuliang,
+            hj.huli_neirong as huliNeirong,
+            hj.laoren_fankui as laorenFankui,
+            hj.zhuangtai
+        from huli_jilu hj
+        join laoren_xinxi l on hj.laoren_id = l.id
+        join huli_renyuan hr on hj.huli_renyuan_id = hr.id
+        join huli_xiangmu hx on hj.xiangmu_id = hx.id
+        <where>
+            hj.zhuangtai != '取消'
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="huliRenyuanXingming != null and huliRenyuanXingming != ''">
+                and hr.xingming like concat('%', #{huliRenyuanXingming}, '%')
+            </if>
+            <if test="xiangmuMingcheng != null and xiangmuMingcheng != ''">
+                and hx.xiangmu_mingcheng like concat('%', #{xiangmuMingcheng}, '%')
+            </if>
+            <if test="riqi != null and riqi != ''">
+                and date(hj.huli_shijian) = #{riqi}
+            </if>
+        </where>
+        order by hj.huli_shijian desc, hj.id desc
+    </select>
+
+    <update id="deleteHuliJilu">
+        update huli_jilu set zhuangtai = '取消' where id = #{id}
+    </update>
+
+    <select id="findJiankangList" resultType="map">
+        select
+            jj.id,
+            jj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            hr.xingming as huliRenyuanXingming,
+            jj.jiance_shijian as jianceShijian,
+            jj.tiwen,
+            jj.gaoya,
+            jj.diya,
+            jj.xinlv,
+            jj.xueyang,
+            jj.xuetang,
+            jj.qingkuang
+        from jiankang_jiance jj
+        join laoren_xinxi l on jj.laoren_id = l.id
+        left join huli_renyuan hr on jj.huli_renyuan_id = hr.id
+        <where>
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="riqi != null and riqi != ''">
+                and date(jj.jiance_shijian) = #{riqi}
+            </if>
+        </where>
+        order by jj.jiance_shijian desc, jj.id desc
+    </select>
+
+    <select id="findFuyaoList" resultType="map">
+        select
+            fj.id,
+            fj.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            hr.xingming as huliRenyuanXingming,
+            yp.yaopin_mingcheng as yaopinMingcheng,
+            yp.guige,
+            fj.jihua_shijian as jihuaShijian,
+            fj.shiji_shijian as shijiShijian,
+            fj.zhixing_zhuangtai as zhixingZhuangtai,
+            fj.beizhu
+        from fuyao_jilu fj
+        join laoren_xinxi l on fj.laoren_id = l.id
+        join yaopin_xinxi yp on fj.yaopin_id = yp.id
+        left join huli_renyuan hr on fj.huli_renyuan_id = hr.id
+        <where>
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="yaopinMingcheng != null and yaopinMingcheng != ''">
+                and yp.yaopin_mingcheng like concat('%', #{yaopinMingcheng}, '%')
+            </if>
+            <if test="zhixingZhuangtai != null and zhixingZhuangtai != ''">
+                and fj.zhixing_zhuangtai = #{zhixingZhuangtai}
+            </if>
+            <if test="riqi != null and riqi != ''">
+                and date(fj.jihua_shijian) = #{riqi}
+            </if>
+        </where>
+        order by fj.jihua_shijian desc, fj.id desc
+    </select>
+</mapper>

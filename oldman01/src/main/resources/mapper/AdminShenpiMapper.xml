@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.admin.mapper.AdminShenpiMapper">
+    <select id="findWaichuList" resultType="map">
+        select
+            ws.id,
+            ws.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            hr.xingming as huliRenyuanXingming,
+            ws.waichu_shiyou as waichuShiyou,
+            ws.waichu_shijian as waichuShijian,
+            ws.yuji_huiyuan_shijian as yujiHuiyuanShijian,
+            ws.shiji_huiyuan_shijian as shijiHuiyuanShijian,
+            ws.peitong_ren as peitongRen,
+            ws.peitong_dianhua as peitongDianhua,
+            ws.shenqing_ren_id as shenqingRenId,
+            coalesce(ws.shenqing_ren_leixing, '历史数据') as shenqingRenLeixing,
+            coalesce(ws.shenqing_ren_xingming, '') as shenqingRenXingming,
+            ws.shenpi_zhuangtai as shenpiZhuangtai,
+            sy.xingming as shenpiRenXingming,
+            ws.shenpi_shijian as shenpiShijian,
+            ws.shenpi_yijian as shenpiYijian,
+            c.id as chuangweiId,
+            c.chuangweihao,
+            c.zhuangtai as chuangweiZhuangtai
+        from waichu_shenqing ws
+        join laoren_xinxi l on ws.laoren_id = l.id
+        left join huli_renyuan hr on ws.huli_renyuan_id = hr.id
+        left join xitong_yonghu sy on ws.shenpi_ren_id = sy.id
+        left join chuangwei_shiyong cs on ws.laoren_id = cs.laoren_id and cs.shiyong_zhuangtai = '正在使用'
+        left join chuangwei_xinxi c on cs.chuangwei_id = c.id
+        <where>
+            and coalesce(ws.shanchu_zhuangtai, '正常') = '正常'
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="shenpiZhuangtai != null and shenpiZhuangtai != ''">
+                and ws.shenpi_zhuangtai = #{shenpiZhuangtai}
+            </if>
+        </where>
+        order by ws.waichu_shijian desc, ws.id desc
+    </select>
+
+    <select id="findWaichuById" resultType="map">
+        select id, laoren_id as laorenId, shenpi_zhuangtai as shenpiZhuangtai
+        from waichu_shenqing
+        where id = #{id}
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+
+    <update id="updateWaichuShenpi">
+        update waichu_shenqing
+        set shenpi_zhuangtai = #{shenpiZhuangtai},
+            shenpi_ren_id = #{shenpiRenId},
+            shenpi_shijian = now(),
+            shenpi_yijian = #{shenpiYijian}
+        where id = #{id}
+    </update>
+
+    <update id="updateWaichuHuiyuan">
+        update waichu_shenqing
+        set shenpi_zhuangtai = '已回院',
+            shiji_huiyuan_shijian = now()
+        where id = #{id}
+    </update>
+
+    <update id="deleteWaichuLogic">
+        update waichu_shenqing
+        set shanchu_zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+
+    <select id="findTuizhuList" resultType="map">
+        select
+            ts.id,
+            ts.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            hr.xingming as huliRenyuanXingming,
+            ts.tuizhu_leixing as tuizhuLeixing,
+            ts.tuizhu_yuanyin as tuizhuYuanyin,
+            ts.tuizhu_shijian as tuizhuShijian,
+            ts.shenqing_ren_id as shenqingRenId,
+            coalesce(ts.shenqing_ren_leixing, '历史数据') as shenqingRenLeixing,
+            coalesce(ts.shenqing_ren_xingming, '') as shenqingRenXingming,
+            ts.shenpi_zhuangtai as shenpiZhuangtai,
+            sy.xingming as shenpiRenXingming,
+            ts.shenpi_shijian as shenpiShijian,
+            ts.shenpi_yijian as shenpiYijian,
+            c.id as chuangweiId,
+            c.chuangweihao,
+            c.zhuangtai as chuangweiZhuangtai
+        from tuizhu_shenqing ts
+        join laoren_xinxi l on ts.laoren_id = l.id
+        left join huli_renyuan hr on ts.huli_renyuan_id = hr.id
+        left join xitong_yonghu sy on ts.shenpi_ren_id = sy.id
+        left join chuangwei_shiyong cs on ts.laoren_id = cs.laoren_id and cs.shiyong_zhuangtai = '正在使用'
+        left join chuangwei_xinxi c on cs.chuangwei_id = c.id
+        <where>
+            and coalesce(ts.shanchu_zhuangtai, '正常') = '正常'
+            <if test="laorenXingming != null and laorenXingming != ''">
+                and l.xingming like concat('%', #{laorenXingming}, '%')
+            </if>
+            <if test="shenpiZhuangtai != null and shenpiZhuangtai != ''">
+                and ts.shenpi_zhuangtai = #{shenpiZhuangtai}
+            </if>
+        </where>
+        order by ts.tuizhu_shijian desc, ts.id desc
+    </select>
+
+    <select id="findTuizhuById" resultType="map">
+        select id, laoren_id as laorenId, shenpi_zhuangtai as shenpiZhuangtai
+        from tuizhu_shenqing
+        where id = #{id}
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+
+    <update id="updateTuizhuShenpi">
+        update tuizhu_shenqing
+        set shenpi_zhuangtai = #{shenpiZhuangtai},
+            shenpi_ren_id = #{shenpiRenId},
+            shenpi_shijian = now(),
+            shenpi_yijian = #{shenpiYijian}
+        where id = #{id}
+    </update>
+
+    <update id="deleteTuizhuLogic">
+        update tuizhu_shenqing
+        set shanchu_zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+
+    <select id="findCurrentChuangweiByLaorenId" resultType="map">
+        select cs.chuangwei_id as chuangweiId, cs.fangjian_id as fangjianId, c.zhuangtai as chuangweiZhuangtai
+        from chuangwei_shiyong cs
+        join chuangwei_xinxi c on cs.chuangwei_id = c.id
+        where cs.laoren_id = #{laorenId}
+          and cs.shiyong_zhuangtai = '正在使用'
+        limit 1
+    </select>
+
+    <update id="updateChuangweiZhuangtai">
+        update chuangwei_xinxi set zhuangtai = #{zhuangtai} where id = #{chuangweiId}
+    </update>
+
+    <update id="endCurrentChuangweiShiyong">
+        update chuangwei_shiyong
+        set shiyong_zhuangtai = '历史',
+            jieshu_riqi = curdate(),
+            yuanyin = #{yuanyin}
+        where laoren_id = #{laorenId}
+          and shiyong_zhuangtai = '正在使用'
+    </update>
+
+    <update id="updateLaorenRuzhuZhuangtai">
+        update laoren_xinxi set ruzhu_zhuangtai = #{ruzhuZhuangtai} where id = #{laorenId}
+    </update>
+</mapper>

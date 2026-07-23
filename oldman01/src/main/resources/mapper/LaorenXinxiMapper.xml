@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.laoren.mapper.LaorenXinxiMapper">
+    <sql id="LaorenColumns">
+        l.id,
+        l.laoren_bianhao as laorenBianhao,
+        l.xingming,
+        l.xingbie,
+        l.nianling,
+        l.laoren_leixing as laorenLeixing,
+        l.ruzhu_zhuangtai as ruzhuZhuangtai,
+        l.lianxi_dianhua as lianxiDianhua,
+        l.jiating_zhuzhi as jiatingZhuzhi,
+        l.touxiang
+    </sql>
+
+    <select id="findAll" resultType="com.neu.laoren.entity.LaorenXinxi">
+        select <include refid="LaorenColumns"/>
+        from laoren_xinxi l
+        where l.ruzhu_zhuangtai != '已删除'
+        order by l.id desc
+    </select>
+
+    <select id="findByHuliYonghuId" resultType="com.neu.laoren.entity.LaorenXinxi">
+        select distinct <include refid="LaorenColumns"/>
+        from laoren_xinxi l
+        join renyuan_laoren rl on l.id = rl.laoren_id
+        join huli_renyuan hr on rl.huli_renyuan_id = hr.id
+        where hr.yonghu_id = #{yonghuId}
+          and l.ruzhu_zhuangtai != '已删除'
+        order by l.id desc
+    </select>
+
+    <select id="findByJiashuYonghuId" resultType="com.neu.laoren.entity.LaorenXinxi">
+        select distinct <include refid="LaorenColumns"/>
+        from laoren_xinxi l
+        join jiashu_xinxi j on l.id = j.laoren_id
+        join xitong_yonghu y on j.shouji = y.shouji
+        where y.id = #{yonghuId}
+          and l.ruzhu_zhuangtai != '已删除'
+        order by l.id desc
+    </select>
+
+    <select id="findOptions" resultType="map">
+        select
+            l.id,
+            l.laoren_bianhao as laorenBianhao,
+            l.xingming,
+            l.xingbie,
+            l.nianling,
+            l.ruzhu_zhuangtai as ruzhuZhuangtai
+        from laoren_xinxi l
+        where l.ruzhu_zhuangtai != '已删除'
+        order by l.id desc
+    </select>
+
+    <select id="findBasicById" resultType="map">
+        select
+            id,
+            xingming,
+            ruzhu_zhuangtai as ruzhuZhuangtai
+        from laoren_xinxi
+        where id = #{id}
+          and ruzhu_zhuangtai != '已删除'
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into laoren_xinxi (
+            laoren_bianhao, xingming, xingbie, chusheng_riqi, nianling,
+            shenfenzheng, xuexing, hunyin_zhuangkuang, laoren_leixing,
+            ruzhu_zhuangtai, lianxi_dianhua, jiating_zhuzhi, touxiang, beizhu
+        ) values (
+            #{laorenBianhao}, #{xingming}, #{xingbie}, #{chushengRiqi}, #{nianling},
+            #{shenfenzheng}, #{xuexing}, #{hunyinZhuangkuang}, #{laorenLeixing},
+            coalesce(#{ruzhuZhuangtai}, '未入住'), #{lianxiDianhua}, #{jiatingZhuzhi}, #{touxiang}, #{beizhu}
+        )
+    </insert>
+
+    <update id="update">
+        update laoren_xinxi
+        set
+            laoren_bianhao = #{laorenBianhao},
+            xingming = #{xingming},
+            xingbie = #{xingbie},
+            chusheng_riqi = #{chushengRiqi},
+            nianling = #{nianling},
+            shenfenzheng = #{shenfenzheng},
+            xuexing = #{xuexing},
+            hunyin_zhuangkuang = #{hunyinZhuangkuang},
+            laoren_leixing = #{laorenLeixing},
+            ruzhu_zhuangtai = #{ruzhuZhuangtai},
+            lianxi_dianhua = #{lianxiDianhua},
+            jiating_zhuzhi = #{jiatingZhuzhi},
+            touxiang = #{touxiang},
+            beizhu = #{beizhu}
+        where id = #{id}
+    </update>
+
+    <update id="deleteLogic">
+        update laoren_xinxi set ruzhu_zhuangtai = '已删除' where id = #{id}
+    </update>
+
+    <insert id="insertJiashu">
+        insert into jiashu_xinxi (
+            laoren_id, xingming, guanxi, shouji, shenfenzheng, dizhi, shi_moren, beizhu
+        ) values (
+            #{laorenId}, #{jiashuXingming}, #{guanxi}, #{jiashuShouji}, #{jiashuShenfenzheng}, #{jiashuDizhi}, 1, #{jiashuBeizhu}
+        )
+    </insert>
+
+    <insert id="insertRuzhuDengji">
+        insert into ruzhu_dengji (
+            laoren_id, fangjian_id, chuangwei_id, ruzhu_shijian, hetong_daoqi,
+            ruzhu_leixing, yajin, jingbanren_id, beizhu
+        ) values (
+            #{laorenId}, #{fangjianId}, #{chuangweiId}, #{ruzhuShijian}, #{hetongDaoqi},
+            coalesce(#{ruzhuLeixing}, '正式入住'), coalesce(#{yajin}, 0), #{jingbanrenId}, #{beizhu}
+        )
+    </insert>
+
+    <update id="updateLaorenRuzhuZhuangtai">
+        update laoren_xinxi set ruzhu_zhuangtai = #{zhuangtai} where id = #{id}
+    </update>
+
+    <select id="countKeBanliRuzhuShenqing" resultType="int">
+        select count(1)
+        from ruzhu_shenqing
+        where id = #{shenqingId}
+          and laoren_id = #{laorenId}
+          and shenqing_zhuangtai = '已通过'
+          and coalesce(banli_zhuangtai, '未办理') = '未办理'
+          and shanchu_zhuangtai = '正常'
+    </select>
+
+    <update id="updateRuzhuShenqingBanli">
+        update ruzhu_shenqing
+        set banli_zhuangtai = '已办理'
+        where id = #{shenqingId}
+    </update>
+</mapper>

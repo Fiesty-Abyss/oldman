@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.huliguanli.mapper.HuliXiangmuMapper">
+    <select id="findList" resultType="map">
+        select
+            id,
+            xiangmu_bianhao as xiangmuBianhao,
+            xiangmu_mingcheng as xiangmuMingcheng,
+            jiage,
+            zhixing_zhouqi as zhixingZhouqi,
+            zhixing_cishu as zhixingCishu,
+            danwei,
+            zhuangtai,
+            miaoshu
+        from huli_xiangmu
+        <where>
+            zhuangtai != '已删除'
+            <if test="xiangmuMingcheng != null and xiangmuMingcheng != ''">
+                and xiangmu_mingcheng like concat('%', #{xiangmuMingcheng}, '%')
+            </if>
+            <if test="zhuangtai != null and zhuangtai != ''">
+                and zhuangtai = #{zhuangtai}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="findBoundByJibieId" resultType="map">
+        select
+            x.id,
+            x.xiangmu_bianhao as xiangmuBianhao,
+            x.xiangmu_mingcheng as xiangmuMingcheng,
+            x.jiage,
+            x.zhixing_zhouqi as zhixingZhouqi,
+            x.zhixing_cishu as zhixingCishu,
+            x.danwei,
+            x.zhuangtai,
+            x.miaoshu
+        from jibie_xiangmu jx
+        join huli_xiangmu x on jx.xiangmu_id = x.id
+        where jx.jibie_id = #{jibieId}
+          and x.zhuangtai != '已删除'
+        order by x.id desc
+    </select>
+
+    <select id="findUnboundEnabledByJibieId" resultType="map">
+        select
+            x.id,
+            x.xiangmu_bianhao as xiangmuBianhao,
+            x.xiangmu_mingcheng as xiangmuMingcheng,
+            x.jiage,
+            x.zhixing_zhouqi as zhixingZhouqi,
+            x.zhixing_cishu as zhixingCishu,
+            x.danwei,
+            x.zhuangtai,
+            x.miaoshu
+        from huli_xiangmu x
+        where x.zhuangtai = '启用'
+          and not exists (
+              select 1 from jibie_xiangmu jx
+              where jx.jibie_id = #{jibieId}
+                and jx.xiangmu_id = x.id
+          )
+        order by x.id desc
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into huli_xiangmu (
+            xiangmu_bianhao, xiangmu_mingcheng, jiage, zhixing_zhouqi,
+            zhixing_cishu, danwei, zhuangtai, miaoshu
+        ) values (
+            #{xiangmuBianhao}, #{xiangmuMingcheng}, coalesce(#{jiage}, 0), #{zhixingZhouqi},
+            coalesce(#{zhixingCishu}, 1), coalesce(#{danwei}, '次'), coalesce(#{zhuangtai}, '启用'), #{miaoshu}
+        )
+    </insert>
+
+    <update id="update">
+        update huli_xiangmu
+        set
+            xiangmu_bianhao = #{xiangmuBianhao},
+            xiangmu_mingcheng = #{xiangmuMingcheng},
+            jiage = #{jiage},
+            zhixing_zhouqi = #{zhixingZhouqi},
+            zhixing_cishu = #{zhixingCishu},
+            danwei = #{danwei},
+            zhuangtai = #{zhuangtai},
+            miaoshu = #{miaoshu}
+        where id = #{id}
+    </update>
+
+    <update id="changeStatus">
+        update huli_xiangmu set zhuangtai = #{zhuangtai} where id = #{id}
+    </update>
+
+    <update id="deleteLogic">
+        update huli_xiangmu set zhuangtai = '已删除' where id = #{id}
+    </update>
+
+    <delete id="deleteJibieBindings">
+        delete from jibie_xiangmu where xiangmu_id = #{xiangmuId}
+    </delete>
+</mapper>
