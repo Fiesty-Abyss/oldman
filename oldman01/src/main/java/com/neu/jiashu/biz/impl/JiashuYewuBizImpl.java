@@ -1,6 +1,7 @@
 package com.neu.jiashu.biz.impl;
 
 import com.neu.common.auth.DangqianYonghu;
+import com.neu.config.UploadPaths;
 import com.neu.jiashu.biz.JiashuYewuBiz;
 import com.neu.jiashu.mapper.JiashuYewuMapper;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class JiashuYewuBizImpl implements JiashuYewuBiz {
 
     private static final long MAX_AVATAR_SIZE = 5L * 1024L * 1024L;
-    private static final Path AVATAR_DIR = Paths.get("E:/2026shixun/oldman/uploads/avatar").toAbsolutePath().normalize();
+    private static final Path AVATAR_DIR = UploadPaths.avatarDir();
     private static final Set<String> ALLOWED_AVATAR_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
 
     private final JiashuYewuMapper jiashuYewuMapper;
