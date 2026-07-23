@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.kanban.mapper.KanbanMapper">
+    <select id="countLaoren" resultType="java.lang.Integer">
+        select count(*) from laoren_xinxi
+    </select>
+
+    <select id="countZaizhuLaoren" resultType="java.lang.Integer">
+        select count(*) from laoren_xinxi where ruzhu_zhuangtai = '在住'
+    </select>
+
+    <select id="countKongxianChuangwei" resultType="java.lang.Integer">
+        select count(*) from chuangwei_xinxi where zhuangtai = '空闲'
+    </select>
+
+    <select id="countHuliRenyuan" resultType="java.lang.Integer">
+        select count(*) from huli_renyuan where zhuangtai = '在职'
+    </select>
+
+    <select id="countDaishenpiWaichu" resultType="java.lang.Integer">
+        select count(*) from waichu_shenqing where shenpi_zhuangtai = '待审批' and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+
+    <select id="countDaishenpiTuizhu" resultType="java.lang.Integer">
+        select count(*) from tuizhu_shenqing where shenpi_zhuangtai = '待审批' and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.yaopin.mapper.YaopinMapper">
+    <select id="findList" resultType="map">
+        select
+            id,
+            yaopin_bianhao as yaopinBianhao,
+            yaopin_mingcheng as yaopinMingcheng,
+            guige,
+            danwei,
+            changjia,
+            kucun,
+            zhuyi_shixiang as zhuyiShixiang,
+            zhuangtai
+        from yaopin_xinxi
+        where coalesce(zhuangtai, '启用') = '启用'
+        <if test="yaopinMingcheng != null and yaopinMingcheng != ''">
+            and yaopin_mingcheng like concat('%', #{yaopinMingcheng}, '%')
+        </if>
+        order by id desc
+    </select>
+
+    <insert id="insert">
+        insert into yaopin_xinxi (
+            yaopin_bianhao, yaopin_mingcheng, guige, danwei,
+            changjia, kucun, zhuyi_shixiang, zhuangtai
+        ) values (
+            #{yaopinBianhao}, #{yaopinMingcheng}, #{guige}, #{danwei},
+            #{changjia}, #{kucun}, #{zhuyiShixiang}, #{zhuangtai}
+        )
+    </insert>
+
+    <update id="disable">
+        update yaopin_xinxi
+        set zhuangtai = '停用'
+        where id = #{id}
+    </update>
+</mapper>

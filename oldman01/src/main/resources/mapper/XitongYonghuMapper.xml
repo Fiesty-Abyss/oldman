@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.xitong.mapper.XitongYonghuMapper">
+    <resultMap id="XitongYonghuResultMap" type="com.neu.xitong.entity.XitongYonghu">
+        <id property="id" column="id"/>
+        <result property="dengluZhanghao" column="denglu_zhanghao"/>
+        <result property="mima" column="mima"/>
+        <result property="xingming" column="xingming"/>
+        <result property="xingbie" column="xingbie"/>
+        <result property="shouji" column="shouji"/>
+        <result property="youxiang" column="youxiang"/>
+        <result property="touxiang" column="touxiang"/>
+        <result property="zhuangtai" column="zhuangtai"/>
+        <result property="zuihouDengluShijian" column="zuihou_denglu_shijian"/>
+        <collection property="jueseList" ofType="com.neu.xitong.entity.XitongJuese">
+            <id property="id" column="juese_id"/>
+            <result property="jueseBianma" column="juese_bianma"/>
+            <result property="jueseMingcheng" column="juese_mingcheng"/>
+            <result property="miaoshu" column="juese_miaoshu"/>
+        </collection>
+    </resultMap>
+
+    <select id="findByDengluZhanghao" resultMap="XitongYonghuResultMap">
+        select
+            y.id,
+            y.denglu_zhanghao,
+            y.mima,
+            y.xingming,
+            y.xingbie,
+            y.shouji,
+            y.youxiang,
+            y.touxiang,
+            y.zhuangtai,
+            y.zuihou_denglu_shijian,
+            j.id as juese_id,
+            j.juese_bianma,
+            j.juese_mingcheng,
+            j.miaoshu as juese_miaoshu
+        from xitong_yonghu y
+        left join yonghu_juese yj on y.id = yj.yonghu_id
+        left join xitong_juese j on yj.juese_id = j.id
+        where y.denglu_zhanghao = #{dengluZhanghao}
+    </select>
+
+    <select id="findById" resultMap="XitongYonghuResultMap">
+        select
+            y.id,
+            y.denglu_zhanghao,
+            y.mima,
+            y.xingming,
+            y.xingbie,
+            y.shouji,
+            y.youxiang,
+            y.touxiang,
+            y.zhuangtai,
+            y.zuihou_denglu_shijian,
+            j.id as juese_id,
+            j.juese_bianma,
+            j.juese_mingcheng,
+            j.miaoshu as juese_miaoshu
+        from xitong_yonghu y
+        left join yonghu_juese yj on y.id = yj.yonghu_id
+        left join xitong_juese j on yj.juese_id = j.id
+        where y.id = #{id}
+    </select>
+
+    <update id="updateZuihouDengluShijian">
+        update xitong_yonghu
+        set zuihou_denglu_shijian = now()
+        where id = #{id}
+    </update>
+</mapper>

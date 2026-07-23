@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.zanzhu.mapper.ZanzhuMapper">
+    <select id="gongkaiList" resultType="map">
+        select
+            zanzhu_jilu_id as zanzhuJiluId,
+            zanzhu_renming as zanzhuRenming,
+            zanzhu_leixing as zanzhuLeixing,
+            coalesce(nullif(touxiang_url, ''), '/uploads/zanzhu/donor-default.jpg') as touxiangUrl,
+            zanzhu_biaoti as zanzhuBiaoti,
+            zanzhu_fangshi as zanzhuFangshi,
+            zanzhu_jine as zanzhuJine,
+            zanzhu_riqi as zanzhuRiqi,
+            zanzhu_yongtu as zanzhuYongtu,
+            zanzhu_shuoming as zanzhuShuoming,
+            shenhe_zhuangtai as shenheZhuangtai
+        from v_zanzhu_gongkai
+        order by zanzhu_riqi desc, zanzhu_jilu_id desc
+    </select>
+
+    <select id="yongtuList" resultType="map">
+        select
+            yongtu_id as yongtuId,
+            zanzhu_biaoti as zanzhuBiaoti,
+            zanzhu_renming as zanzhuRenming,
+            yongtu_mingcheng as yongtuMingcheng,
+            yongtu_leibie as yongtuLeibie,
+            shiyong_jine as shiyongJine,
+            shiyong_riqi as shiyongRiqi,
+            shiyong_shuoming as shiyongShuoming
+        from v_zanzhu_yongtu_gongkai
+        order by shiyong_riqi desc, yongtu_id desc
+    </select>
+
+    <select id="wuziList" resultType="map">
+        select
+            w.id as wuziId,
+            zr.zanzhu_renming as zanzhuRenming,
+            zj.zanzhu_biaoti as zanzhuBiaoti,
+            w.wuzi_mingcheng as wuziMingcheng,
+            w.wuzi_leibie as wuziLeibie,
+            w.shuliang,
+            w.danwei,
+            w.guji_jiazhi as gujiJiazhi,
+            w.baozhiqi,
+            w.ruku_zhuangtai as rukuZhuangtai,
+            w.beizhu
+        from wuzi_juanzeng w
+        join zanzhu_jilu zj on w.zanzhu_jilu_id = zj.id
+        join zanzhu_ren zr on zj.zanzhu_ren_id = zr.id
+        where w.shanchu_zhuangtai = 0
+          and zj.shanchu_zhuangtai = 0
+          and zr.shanchu_zhuangtai = 0
+          and zj.gongkai_zhuangtai = 1
+          and zr.gongkai_zhuangtai = 1
+        order by w.id desc
+    </select>
+</mapper>

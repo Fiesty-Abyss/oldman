@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.admin.mapper.AdminLaorenXiugaiShenqingMapper">
+    <sql id="BaseSelect">
+        select
+            sq.id,
+            sq.laoren_id as laorenId,
+            sq.jiashu_id as jiashuId,
+            sq.jiashu_xingming as jiashuXingming,
+            sq.laoren_xingming as laorenXingming,
+            sq.yuan_lianxi_dianhua as yuanLianxiDianhua,
+            sq.xin_lianxi_dianhua as xinLianxiDianhua,
+            sq.yuan_jiating_zhuzhi as yuanJiatingZhuzhi,
+            sq.xin_jiating_zhuzhi as xinJiatingZhuzhi,
+            sq.yuan_touxiang as yuanTouxiang,
+            sq.xin_touxiang as xinTouxiang,
+            sq.yuan_beizhu as yuanBeizhu,
+            sq.xin_beizhu as xinBeizhu,
+            sq.xiugai_shuoming as xiugaiShuoming,
+            sq.shenqing_zhuangtai as shenqingZhuangtai,
+            sq.shenhe_ren_id as shenheRenId,
+            sq.shenhe_ren_xingming as shenheRenXingming,
+            sq.shenhe_shijian as shenheShijian,
+            sq.shenhe_yijian as shenheYijian,
+            sq.chuangjian_shijian as chuangjianShijian,
+            sq.gengxin_shijian as gengxinShijian
+        from laoren_xinxi_xiugai_shenqing sq
+    </sql>
+
+    <select id="findList" resultType="map">
+        <include refid="BaseSelect"/>
+        where coalesce(sq.shanchu_zhuangtai, '正常') = '正常'
+        <if test="laorenXingming != null and laorenXingming != ''">
+            and sq.laoren_xingming like concat('%', #{laorenXingming}, '%')
+        </if>
+        <if test="jiashuXingming != null and jiashuXingming != ''">
+            and sq.jiashu_xingming like concat('%', #{jiashuXingming}, '%')
+        </if>
+        <if test="shenqingZhuangtai != null and shenqingZhuangtai != ''">
+            and sq.shenqing_zhuangtai = #{shenqingZhuangtai}
+        </if>
+        order by sq.id desc
+    </select>
+
+    <select id="findById" resultType="map">
+        <include refid="BaseSelect"/>
+        where sq.id = #{id}
+          and coalesce(sq.shanchu_zhuangtai, '正常') = '正常'
+        limit 1
+    </select>
+
+    <select id="findYonghuXingming" resultType="string">
+        select coalesce(xingming, denglu_zhanghao)
+        from xitong_yonghu
+        where id = #{id}
+        limit 1
+    </select>
+
+    <update id="updateLaorenXinxi">
+        update laoren_xinxi
+        set
+            lianxi_dianhua = #{xinLianxiDianhua},
+            jiating_zhuzhi = #{xinJiatingZhuzhi},
+            beizhu = #{xinBeizhu},
+            <if test="xinTouxiang != null and xinTouxiang != ''">
+                touxiang = #{xinTouxiang},
+            </if>
+            gengxin_shijian = now()
+        where id = #{laorenId}
+    </update>
+
+    <update id="updateShenhe">
+        update laoren_xinxi_xiugai_shenqing
+        set shenqing_zhuangtai = #{shenqingZhuangtai},
+            shenhe_ren_id = #{shenheRenId},
+            shenhe_ren_xingming = #{shenheRenXingming},
+            shenhe_shijian = now(),
+            shenhe_yijian = #{shenheYijian}
+        where id = #{id}
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </update>
+
+    <update id="deleteLogic">
+        update laoren_xinxi_xiugai_shenqing
+        set shanchu_zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,44 @@
+[
+  {
+    "Name": "家属不能看未绑定老人",
+    "Code": 400,
+    "Message": "只能查看或操作自己绑定的老人",
+    "ExpectedRejected": true
+  },
+  {
+    "Name": "重复分配被拒绝",
+    "Code": 400,
+    "Message": "该老人已经分配给当前护理员",
+    "ExpectedRejected": true
+  },
+  {
+    "Name": "护理员不能看未分配老人详情",
+    "Code": 400,
+    "Message": "只能操作自己负责的老人",
+    "ExpectedRejected": true
+  },
+  {
+    "Name": "护理员访问系统管理被拒绝",
+    "Code": 400,
+    "Message": "只有管理员可以访问系统管理",
+    "ExpectedRejected": true
+  },
+  {
+    "Name": "家属访问系统管理被拒绝",
+    "Code": 400,
+    "Message": "只有管理员可以访问系统管理",
+    "ExpectedRejected": true
+  },
+  {
+    "Name": "未登录访问家属后台被拒绝",
+    "Code": 400,
+    "Message": "请先登录后再访问",
+    "ExpectedRejected": true
+  },
+  {
+    "Name": "家属不能调用管理员费用接口",
+    "Code": 400,
+    "Message": "只有管理员可以管理费用账单",
+    "ExpectedRejected": true
+  }
+]

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.xitong.mapper.XitongGuanliMapper">
+    <select id="findYonghuList" resultType="map">
+        select
+            y.id,
+            y.denglu_zhanghao as dengluZhanghao,
+            y.xingming,
+            y.xingbie,
+            y.shouji,
+            y.youxiang,
+            y.touxiang,
+            y.zhuangtai,
+            y.zuihou_denglu_shijian as zuihouDengluShijian,
+            y.chuangjian_shijian as chuangjianShijian,
+            group_concat(distinct j.id order by j.id) as jueseIds,
+            group_concat(distinct j.juese_bianma order by j.id separator ',') as jueseBianmaList,
+            group_concat(distinct j.juese_mingcheng order by j.id separator '、') as jueseMingchengList,
+            case
+                when sum(case when j.juese_bianma = 'admin' then 1 else 0 end) > 0 then '管理员'
+                when sum(case when j.juese_bianma = 'huli' then 1 else 0 end) > 0 then '护理员'
+                when sum(case when j.juese_bianma = 'jiashu' then 1 else 0 end) > 0 then '家属'
+                else '未分配'
+            end as yonghuLeixing,
+            hr.id as huliRenyuanId,
+            hr.gonghao as huliGonghao,
+            js.id as jiashuId,
+            js.laoren_id as jiashuLaorenId
+        from xitong_yonghu y
+        left join yonghu_juese yj on y.id = yj.yonghu_id
+        left join xitong_juese j on yj.juese_id = j.id
+        left join huli_renyuan hr on y.id = hr.yonghu_id
+        left join jiashu_xinxi js on y.shouji = js.shouji and js.shi_moren = 1
+        <where>
+            <if test="dengluZhanghao != null and dengluZhanghao != ''">
+                and y.denglu_zhanghao like concat('%', #{dengluZhanghao}, '%')
+            </if>
+            <if test="xingming != null and xingming != ''">
+                and y.xingming like concat('%', #{xingming}, '%')
+            </if>
+            <if test="zhuangtai != null and zhuangtai != ''">
+                and y.zhuangtai = #{zhuangtai}
+            </if>
+            <if test="jueseBianma != null and jueseBianma != ''">
+                and exists (
+                    select 1
+                    from yonghu_juese fyj
+                    join xitong_juese fj on fyj.juese_id = fj.id
+                    where fyj.yonghu_id = y.id
+                      and fj.juese_bianma = #{jueseBianma}
+                )
+            </if>
+        </where>
+        group by y.id, y.denglu_zhanghao, y.xingming, y.xingbie, y.shouji, y.youxiang,
+                 y.touxiang, y.zhuangtai, y.zuihou_denglu_shijian, y.chuangjian_shijian,
+                 hr.id, hr.gonghao, js.id, js.laoren_id
+        order by y.id desc
+    </select>
+
+    <select id="findYonghuById" resultType="map">
+        select id, denglu_zhanghao as dengluZhanghao, xingming, xingbie, shouji, youxiang,
+               touxiang, zhuangtai, chuangjian_shijian as chuangjianShijian
+        from xitong_yonghu
+        where id = #{id}
+    </select>
+
+    <select id="countYonghuByZhanghao" resultType="int">
+        select count(1)
+        from xitong_yonghu
+        where denglu_zhanghao = #{dengluZhanghao}
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insertYonghu" useGeneratedKeys="true" keyProperty="id">
+        insert into xitong_yonghu (
+            denglu_zhanghao, mima, xingming, xingbie, shouji, youxiang, touxiang, zhuangtai
+        ) values (
+            #{dengluZhanghao}, #{mima}, #{xingming}, #{xingbie}, #{shouji}, #{youxiang},
+            coalesce(#{touxiang}, '/uploads/avatar/user-default.jpg'), #{zhuangtai}
+        )
+    </insert>
+
+    <update id="updateYonghu">
+        update xitong_yonghu
+        set denglu_zhanghao = #{dengluZhanghao},
+            xingming = #{xingming},
+            xingbie = #{xingbie},
+            shouji = #{shouji},
+            youxiang = #{youxiang},
+            touxiang = coalesce(#{touxiang}, '/uploads/avatar/user-default.jpg')
+        where id = #{id}
+    </update>
+
+    <update id="updateYonghuStatus">
+        update xitong_yonghu
+        set zhuangtai = #{zhuangtai}
+        where id = #{id}
+    </update>
+
+    <update id="updateYonghuPassword">
+        update xitong_yonghu
+        set mima = #{mima}
+        where id = #{id}
+    </update>
+
+    <select id="findYonghuRole" resultType="map">
+        select
+            j.id,
+            j.juese_bianma as jueseBianma,
+            j.juese_mingcheng as jueseMingcheng,
+            j.miaoshu,
+            case when yj.id is null then 0 else 1 end as yiFenpei
+        from xitong_juese j
+        left join yonghu_juese yj on j.id = yj.juese_id and yj.yonghu_id = #{yonghuId}
+        order by j.id
+    </select>
+
+    <delete id="deleteYonghuRole">
+        delete from yonghu_juese where yonghu_id = #{yonghuId}
+    </delete>
+
+    <insert id="insertYonghuRole">
+        insert into yonghu_juese (yonghu_id, juese_id)
+        values (#{yonghuId}, #{jueseId})
+    </insert>
+
+    <select id="findJueseList" resultType="map">
+        select
+            id,
+            juese_bianma as jueseBianma,
+            juese_mingcheng as jueseMingcheng,
+            '启用' as zhuangtai,
+            miaoshu,
+            chuangjian_shijian as chuangjianShijian
+        from xitong_juese
+        order by id
+    </select>
+
+    <select id="findJueseById" resultType="map">
+        select id, juese_bianma as jueseBianma, juese_mingcheng as jueseMingcheng, miaoshu
+        from xitong_juese
+        where id = #{id}
+    </select>
+
+    <select id="countJueseByBianma" resultType="int">
+        select count(1)
+        from xitong_juese
+        where juese_bianma = #{jueseBianma}
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insertJuese" useGeneratedKeys="true" keyProperty="id">
+        insert into xitong_juese (juese_bianma, juese_mingcheng, miaoshu)
+        values (#{jueseBianma}, #{jueseMingcheng}, #{miaoshu})
+    </insert>
+
+    <update id="updateJuese">
+        update xitong_juese
+        set juese_bianma = #{jueseBianma},
+            juese_mingcheng = #{jueseMingcheng},
+            miaoshu = #{miaoshu}
+        where id = #{id}
+    </update>
+
+    <select id="findHuliRenyuanOptions" resultType="map">
+        select id, yonghu_id as yonghuId, gonghao, xingming, shouji, zhuangtai
+        from huli_renyuan
+        where zhuangtai != '离职'
+        order by id desc
+    </select>
+
+    <select id="findJiashuOptions" resultType="map">
+        select
+            js.id,
+            js.laoren_id as laorenId,
+            l.xingming as laorenXingming,
+            js.xingming,
+            js.guanxi,
+            js.shouji,
+            js.shi_moren as shiMoren
+        from jiashu_xinxi js
+        join laoren_xinxi l on js.laoren_id = l.id
+        order by js.id desc
+    </select>
+
+    <select id="findHuliRenyuanById" resultType="map">
+        select id, yonghu_id as yonghuId, gonghao, xingming, shouji, zhuangtai
+        from huli_renyuan
+        where id = #{id}
+    </select>
+
+    <select id="findJiashuById" resultType="map">
+        select id, laoren_id as laorenId, xingming, guanxi, shouji
+        from jiashu_xinxi
+        where id = #{id}
+    </select>
+
+    <update id="unbindHuliRenyuanByYonghuId">
+        update huli_renyuan
+        set yonghu_id = null
+        where yonghu_id = #{yonghuId}
+    </update>
+
+    <update id="bindHuliRenyuan">
+        update huli_renyuan
+        set yonghu_id = #{yonghuId}
+        where id = #{id}
+    </update>
+</mapper>

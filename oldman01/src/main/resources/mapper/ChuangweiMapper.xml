@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.neu.chuangwei.mapper.ChuangweiMapper">
+    <select id="findFangjianChuangweiList" resultType="map">
+        select
+            f.id as fangjianId,
+            f.loudong,
+            f.louceng,
+            f.fangjianhao,
+            f.fangjian_leixing as fangjianLeixing,
+            c.id as chuangweiId,
+            c.chuangweihao,
+            c.zhuangtai as chuangweiZhuangtai,
+            l.id as laorenId,
+            l.xingming as laorenXingming
+        from fangjian_xinxi f
+        join chuangwei_xinxi c on f.id = c.fangjian_id and coalesce(c.shanchu_zhuangtai, '正常') = '正常'
+        left join chuangwei_shiyong cs on c.id = cs.chuangwei_id and cs.shiyong_zhuangtai = '正在使用'
+        left join laoren_xinxi l on cs.laoren_id = l.id
+        where f.zhuangtai != '已删除'
+        order by f.louceng, f.fangjianhao, c.chuangweihao
+    </select>
+
+    <select id="findFangjianList" resultType="map">
+        select
+            id,
+            loudong,
+            louceng,
+            fangjianhao,
+            fangjian_leixing as fangjianLeixing,
+            chuangwei_shu as chuangweiShu,
+            chaoxiang,
+            tupian,
+            zhuangtai,
+            beizhu
+        from fangjian_xinxi
+        where zhuangtai != '已删除'
+        order by louceng, fangjianhao
+    </select>
+
+    <select id="findFangjianOptions" resultType="map">
+        select id, loudong, louceng, fangjianhao, fangjian_leixing as fangjianLeixing
+        from fangjian_xinxi
+        where zhuangtai != '已删除'
+        order by louceng, fangjianhao
+    </select>
+
+    <insert id="insertFangjian">
+        insert into fangjian_xinxi (
+            loudong, louceng, fangjianhao, fangjian_leixing, chuangwei_shu, chaoxiang, tupian, zhuangtai, beizhu
+        ) values (
+            coalesce(#{loudong}, '606号楼'), #{louceng}, #{fangjianhao}, #{fangjianLeixing}, coalesce(#{chuangweiShu}, 0),
+            #{chaoxiang}, coalesce(#{tupian}, '/uploads/environment/room-default.jpg'), coalesce(#{zhuangtai}, '正常'), #{beizhu}
+        )
+    </insert>
+
+    <update id="updateFangjian">
+        update fangjian_xinxi
+        set loudong = #{loudong},
+            louceng = #{louceng},
+            fangjianhao = #{fangjianhao},
+            fangjian_leixing = #{fangjianLeixing},
+            chaoxiang = #{chaoxiang},
+            tupian = coalesce(#{tupian}, tupian),
+            zhuangtai = coalesce(#{zhuangtai}, zhuangtai),
+            beizhu = #{beizhu}
+        where id = #{id}
+    </update>
+
+    <select id="countNormalChuangweiByFangjianId" resultType="int">
+        select count(1)
+        from chuangwei_xinxi
+        where fangjian_id = #{fangjianId}
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+
+    <update id="deleteFangjianLogic">
+        update fangjian_xinxi
+        set zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+
+    <select id="findChuangweiBaseList" resultType="map">
+        select
+            c.id,
+            c.fangjian_id as fangjianId,
+            f.fangjianhao,
+            f.louceng,
+            c.chuangweihao,
+            c.zhuangtai,
+            c.chuangwei_tupian as chuangweiTupian,
+            c.beizhu
+        from chuangwei_xinxi c
+        join fangjian_xinxi f on c.fangjian_id = f.id
+        where coalesce(c.shanchu_zhuangtai, '正常') = '正常'
+          and f.zhuangtai != '已删除'
+        order by f.louceng, f.fangjianhao, c.chuangweihao
+    </select>
+
+    <select id="findKongxianOptions" resultType="map">
+        select
+            c.id,
+            c.fangjian_id as fangjianId,
+            f.fangjianhao,
+            f.louceng,
+            c.chuangweihao,
+            c.zhuangtai
+        from chuangwei_xinxi c
+        join fangjian_xinxi f on c.fangjian_id = f.id
+        where c.zhuangtai = '空闲'
+          and coalesce(c.shanchu_zhuangtai, '正常') = '正常'
+          and f.zhuangtai != '已删除'
+        <if test="fangjianId != null">
+            and c.fangjian_id = #{fangjianId}
+        </if>
+        order by f.louceng, f.fangjianhao, c.chuangweihao
+    </select>
+
+    <select id="countKongxianChuangwei" resultType="int">
+        select count(1)
+        from chuangwei_xinxi
+        where id = #{id}
+          and zhuangtai = '空闲'
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+
+    <select id="findChuangweiBaseById" resultType="map">
+        select
+            id,
+            fangjian_id as fangjianId,
+            chuangweihao,
+            zhuangtai,
+            chuangwei_tupian as chuangweiTupian,
+            beizhu
+        from chuangwei_xinxi
+        where id = #{id}
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </select>
+
+    <insert id="insertChuangwei">
+        insert into chuangwei_xinxi (
+            fangjian_id, chuangweihao, zhuangtai, chuangwei_tupian, beizhu, shanchu_zhuangtai
+        ) values (
+            #{fangjianId}, #{chuangweihao}, coalesce(#{zhuangtai}, '空闲'),
+            coalesce(#{chuangweiTupian}, '/uploads/environment/bed-default.jpg'), #{beizhu}, '正常'
+        )
+    </insert>
+
+    <update id="updateChuangwei">
+        update chuangwei_xinxi
+        set fangjian_id = #{fangjianId},
+            chuangweihao = #{chuangweihao},
+            zhuangtai = #{zhuangtai},
+            chuangwei_tupian = coalesce(#{chuangweiTupian}, chuangwei_tupian),
+            beizhu = #{beizhu}
+        where id = #{id}
+          and coalesce(shanchu_zhuangtai, '正常') = '正常'
+    </update>
+
+    <update id="deleteChuangweiLogic">
+        update chuangwei_xinxi
+        set shanchu_zhuangtai = '已删除'
+        where id = #{id}
+    </update>
+
+    <update id="refreshFangjianChuangweiShu">
+        update fangjian_xinxi
+        set chuangwei_shu = (
+            select count(1)
+            from chuangwei_xinxi
+            where fangjian_id = #{fangjianId}
+              and coalesce(shanchu_zhuangtai, '正常') = '正常'
+        )
+        where id = #{fangjianId}
+    </update>
+
+    <update id="updateChuangweiZhuangtai">
+        update chuangwei_xinxi set zhuangtai = #{zhuangtai} where id = #{id}
+    </update>
+
+    <insert id="insertChuangweiShiyong">
+        insert into chuangwei_shiyong (
+            laoren_id, fangjian_id, chuangwei_id, kaishi_riqi, shiyong_zhuangtai, yuanyin
+        ) values (
+            #{laorenId}, #{fangjianId}, #{chuangweiId}, coalesce(#{kaishiRiqi}, curdate()), '正在使用', #{yuanyin}
+        )
+    </insert>
+
+    <update id="endCurrentChuangweiShiyong">
+        update chuangwei_shiyong
+        set shiyong_zhuangtai = '历史',
+            jieshu_riqi = curdate(),
+            yuanyin = #{yuanyin}
+        where laoren_id = #{laorenId}
+          and shiyong_zhuangtai = '正在使用'
+    </update>
+
+    <select id="findCurrentChuangweiByLaorenId" resultType="map">
+        select
+            cs.chuangwei_id as chuangweiId,
+            cs.fangjian_id as fangjianId
+        from chuangwei_shiyong cs
+        where cs.laoren_id = #{laorenId}
+          and cs.shiyong_zhuangtai = '正在使用'
+        limit 1
+    </select>
+</mapper>
