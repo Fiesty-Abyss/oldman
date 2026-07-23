@@ -1,6 +1,7 @@
 package com.neu.wenjian.biz.impl;
 
 import com.neu.common.auth.DangqianYonghu;
+import com.neu.config.UploadPaths;
 import com.neu.wenjian.biz.WenjianBiz;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -9,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 public class WenjianBizImpl implements WenjianBiz {
 
     private static final long MAX_SIZE = 5L * 1024L * 1024L;
-    private static final Path UPLOAD_ROOT = Paths.get("E:/2026shixun/oldman/uploads").toAbsolutePath().normalize();
+    private static final Path UPLOAD_ROOT = UploadPaths.resolveUploadRoot();
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final Set<String> ALLOWED_TYPES = Set.of(
             "home", "environment", "login", "zanzhu", "avatar", "default", "captcha"

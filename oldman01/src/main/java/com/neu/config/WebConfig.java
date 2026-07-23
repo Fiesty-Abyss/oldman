@@ -7,12 +7,11 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private static final Path UPLOAD_ROOT = Paths.get("E:/2026shixun/oldman/uploads");
+    private static final Path UPLOAD_ROOT = UploadPaths.resolveUploadRoot();
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -32,5 +31,3 @@ public class WebConfig implements WebMvcConfigurer {
                 .setCacheControl(CacheControl.noStore());
     }
 }
-
-
