@@ -27,6 +27,10 @@ desktop.ini
 # Local junk / duplicates
 新建文件夹/
 
+# Course materials / unrelated archives (not required to run)
+materials/
+docs/成果物.zip
+
 # Logs
 *.log
 **/vite-*.log
