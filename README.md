@@ -124,8 +124,11 @@ oldman/
 ├── oldman01/          # 后端 backend
 ├── oldman1/           # 前端 frontend
 ├── uploads/           # 图片等静态资源
-├── docs/              # 数据库说明、流程与巡检材料等
-└── materials/         # 课程提交材料（非运行必需）
+└── docs/              # 说明文档、巡检归档、截图目录
+    ├── database.md
+    ├── shenqing-liucheng.md
+    ├── audit/         # 巡检报告与原始结果
+    └── images/        # 运行截图（待补充）
 ```
 
 `oldman01`、`oldman1` 为历史目录名，请以本说明中的 backend / frontend 含义阅读。
@@ -206,14 +209,13 @@ npm run dev
 4. **系统角色启停/删除不完整**（表字段不足时接口会明确失败）。
 5. 家属与登录用户通过**手机号**关联，数据不一致会导致无法绑定。
 6. 费用为**线下登记**视角，不含在线支付。
-7. `materials/` 等为课程材料，非运行依赖；目录名 `oldman01` / `oldman1` 为历史命名。
+7. 目录名 `oldman01` / `oldman1` 为历史命名，分别表示 backend / frontend。
 
 ---
 
 ## 12. 后续计划
 
 - [ ] 补充 `docs/images` 运行截图
-- [ ] 整理 docs，移出与运行无关的大包/课程原稿（保留本地备份）
 - [ ] 在可分享前提下补充脱敏的库表初始化方式（**待确认**）
 - [ ] 按需完善角色管理字段或登录说明
 
@@ -225,7 +227,8 @@ npm run dev
 | --- | --- |
 | [`docs/database.md`](docs/database.md) | 建库、关联、排错 |
 | [`docs/shenqing-liucheng.md`](docs/shenqing-liucheng.md) | 外出/退住流程设计 |
-| [`docs/欧德曼养老院管理系统-答辩巡检报告.md`](docs/欧德曼养老院管理系统-答辩巡检报告.md) | 较完整的巡检记录 |
+| [`docs/audit/欧德曼养老院管理系统-答辩巡检报告.md`](docs/audit/欧德曼养老院管理系统-答辩巡检报告.md) | 巡检归档（已脱敏） |
+| `docs/audit/audit-*.json` | 接口/权限巡检原始结果 |
 | `oldman01/README.md`、`oldman1/README.md` | 子模块简要说明 |
 
 配置中的数据库密码仅写在本地，勿提交真实密钥。未添加 License 文件。
