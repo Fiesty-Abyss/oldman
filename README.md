@@ -229,6 +229,7 @@ npm run dev
 | [`docs/shenqing-liucheng.md`](docs/shenqing-liucheng.md) | 外出/退住流程设计 |
 | [`docs/audit/欧德曼养老院管理系统-答辩巡检报告.md`](docs/audit/欧德曼养老院管理系统-答辩巡检报告.md) | 巡检归档（已脱敏） |
 | `docs/audit/audit-*.json` | 接口/权限巡检原始结果 |
+| [`CHANGELOG.md`](CHANGELOG.md) | 仓库整理变更记录 |
 | `oldman01/README.md`、`oldman1/README.md` | 子模块简要说明 |
 
 配置中的数据库密码仅写在本地，勿提交真实密钥。未添加 License 文件。
