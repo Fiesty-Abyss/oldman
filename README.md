@@ -8,6 +8,7 @@
 ![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vuedotjs&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL%208%20%2F%20MariaDB-utf8mb4-4479A1?logo=mysql&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
 ![Roles](https://img.shields.io/badge/角色-访客%20%7C%20管理员%20%7C%20护理员%20%7C%20家属-0f766e)
 
 [![对外首页](docs/screenshots/01-home.png)](docs/screenshots/01-home.png)
@@ -355,4 +356,4 @@ oldman/
 
 - 仓库中的演示数据（人物、电话、地址、身份证号）均为虚构。
 - 数据库密码请通过环境变量提供，不要提交到仓库。
-- 本仓库目前未附带开源许可证（LICENSE）。
+- 源码以 [MIT 许可证](LICENSE) 发布。
