@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.neu.xitong.mapper.XitongYonghuMapper">
-    <resultMap id="XitongYonghuResultMap" type="com.neu.xitong.entity.XitongYonghu">
+<mapper namespace="com.oldman.xitong.mapper.XitongYonghuMapper">
+    <resultMap id="XitongYonghuResultMap" type="com.oldman.xitong.entity.XitongYonghu">
         <id property="id" column="id"/>
         <result property="dengluZhanghao" column="denglu_zhanghao"/>
         <result property="mima" column="mima"/>
@@ -14,7 +14,7 @@
         <result property="touxiang" column="touxiang"/>
         <result property="zhuangtai" column="zhuangtai"/>
         <result property="zuihouDengluShijian" column="zuihou_denglu_shijian"/>
-        <collection property="jueseList" ofType="com.neu.xitong.entity.XitongJuese">
+        <collection property="jueseList" ofType="com.oldman.xitong.entity.XitongJuese">
             <id property="id" column="juese_id"/>
             <result property="jueseBianma" column="juese_bianma"/>
             <result property="jueseMingcheng" column="juese_mingcheng"/>

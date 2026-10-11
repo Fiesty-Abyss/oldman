@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.neu</groupId>
+    <groupId>com.oldman</groupId>
     <artifactId>oldman01</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
