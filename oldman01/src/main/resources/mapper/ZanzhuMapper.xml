@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.neu.zanzhu.mapper.ZanzhuMapper">
+<mapper namespace="com.oldman.zanzhu.mapper.ZanzhuMapper">
     <select id="gongkaiList" resultType="map">
         select
             zanzhu_jilu_id as zanzhuJiluId,

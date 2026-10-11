@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.neu.laoren.mapper.LaorenXinxiMapper">
+<mapper namespace="com.oldman.laoren.mapper.LaorenXinxiMapper">
     <sql id="LaorenColumns">
         l.id,
         l.laoren_bianhao as laorenBianhao,
@@ -16,14 +16,14 @@
         l.touxiang
     </sql>
 
-    <select id="findAll" resultType="com.neu.laoren.entity.LaorenXinxi">
+    <select id="findAll" resultType="com.oldman.laoren.entity.LaorenXinxi">
         select <include refid="LaorenColumns"/>
         from laoren_xinxi l
         where l.ruzhu_zhuangtai != '已删除'
         order by l.id desc
     </select>
 
-    <select id="findByHuliYonghuId" resultType="com.neu.laoren.entity.LaorenXinxi">
+    <select id="findByHuliYonghuId" resultType="com.oldman.laoren.entity.LaorenXinxi">
         select distinct <include refid="LaorenColumns"/>
         from laoren_xinxi l
         join renyuan_laoren rl on l.id = rl.laoren_id
@@ -33,7 +33,7 @@
         order by l.id desc
     </select>
 
-    <select id="findByJiashuYonghuId" resultType="com.neu.laoren.entity.LaorenXinxi">
+    <select id="findByJiashuYonghuId" resultType="com.oldman.laoren.entity.LaorenXinxi">
         select distinct <include refid="LaorenColumns"/>
         from laoren_xinxi l
         join jiashu_xinxi j on l.id = j.laoren_id

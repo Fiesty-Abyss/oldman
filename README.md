@@ -259,7 +259,7 @@ cd oldman01 && mvn -DskipTests package
 oldman/
 ├── oldman01/                后端（Spring Boot）
 │   └── src/main/
-│       ├── java/com/neu/    按业务分包：controller / biz / mapper / entity
+│       ├── java/com/oldman/ 按业务分包：controller / biz / mapper / entity
 │       └── resources/       application.properties、mapper/*.xml
 ├── oldman1/                 前端（Vue 3 + Vite）
 │   └── src/                 views/{duiwai,denglu,admin,huliyuan,jiashu} 等
