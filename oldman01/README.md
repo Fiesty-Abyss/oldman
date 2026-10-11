@@ -14,18 +14,14 @@
 **建库、导入、表关联详见仓库根目录 [`docs/database.md`](../docs/database.md)。**
 
 1. 创建库 `oldman`（utf8mb4）
-2. 导入你的 SQL 转储或实训脚本
-3. 编辑本模块配置：
+2. 导入仓库根目录的 `db/schema.sql`，需要演示数据再导入 `db/seed.sql`
+3. 用环境变量提供连接信息（未设置时使用 `application.properties` 中的默认值）：
 
-`src/main/resources/application.properties`：
-
-```properties
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/oldman?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=你的密码
+```bash
+export OLDMAN_DB_USER=oldman
+export OLDMAN_DB_PASSWORD=你的密码
+# 可选：export OLDMAN_DB_URL='jdbc:mysql://127.0.0.1:3306/oldman?...'
 ```
-
-也可复制 `application.properties.example` 再改。
 
 ## 运行
 
@@ -33,6 +29,8 @@ IntelliJ IDEA 打开本目录，运行 `com.neu.Application`（Working directory
 
 ```bash
 mvn spring-boot:run
+# 或打包后运行
+mvn -DskipTests package && java -jar target/oldman01-0.0.1-SNAPSHOT.jar
 ```
 
 - 后端：`http://localhost:8081`
@@ -52,4 +50,6 @@ mvn spring-boot:run
 - 护理员：`huli_renyuan.yonghu_id` → `renyuan_laoren` 服务中的老人
 - 家属：`xitong_yonghu.shouji` = `jiashu_xinxi.shouji` → 绑定老人
 
-演示账号以数据库实际数据为准（常见如 `admin` / `huli001` / `jiashu001`）。
+演示账号见 [`docs/database.md`](../docs/database.md#23-演示账号)：`admin` / `admin123`，`huli001`、`jiashu001` / `123456`。
+
+接口冒烟测试：`python3 ../scripts/smoke_test.py`。

@@ -1,6 +1,7 @@
 package com.neu.config;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,11 @@ public class MyBatisConfig {
                 new PathMatchingResourcePatternResolver().getResources("classpath:mapper/*.xml")
         );
         factoryBean.setTypeAliasesPackage("com.neu");
+
+        org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
+        // Map 结果中的 DATE 列按 LocalDate 返回，避免 JSON 中出现按 UTC 换算后差一天的日期
+        configuration.getTypeHandlerRegistry().register(Object.class, JdbcType.DATE, new SqlDateAsLocalDateTypeHandler());
+        factoryBean.setConfiguration(configuration);
         return factoryBean.getObject();
     }
 

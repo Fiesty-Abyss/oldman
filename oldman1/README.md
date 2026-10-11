@@ -39,4 +39,4 @@ npm run dev
 - `/huliyuan`：护理员后台
 - `/jiashu`：家属后台
 
-演示账号以数据库为准。
+演示账号：`admin` / `admin123`，`huli001`、`jiashu001` / `123456`（来自 `db/seed.sql`）。登录页右下角的“管理员 / 护理员 / 家属”按钮可一键填入。
