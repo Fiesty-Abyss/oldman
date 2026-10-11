@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- 新增 MIT 许可证
+- Java 包名 `com.neu` 重命名为 `com.oldman`（含 Maven groupId、Mapper namespace、扫描配置）
+- 删除 `uploads/avatar/` 中 3 张疑似真人照片和未使用的 `uploads/下载.jpg`
+
 ## 0.2.0 - 2026-10-11
 
 ### 新增

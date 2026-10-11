@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.neu.jiashu.mapper.JiashuYewuMapper">
+<mapper namespace="com.oldman.jiashu.mapper.JiashuYewuMapper">
     <sql id="BoundJoin">
         join jiashu_xinxi js on l.id = js.laoren_id
         join xitong_yonghu y on js.shouji = y.shouji

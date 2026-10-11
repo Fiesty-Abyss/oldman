@@ -1,6 +1,6 @@
 # oldman01
 
-欧德曼养老院管理系统后端，包名 `com.neu`。
+欧德曼养老院管理系统后端，包名 `com.oldman`。
 
 ## 技术结构
 
@@ -25,7 +25,7 @@ export OLDMAN_DB_PASSWORD=你的密码
 
 ## 运行
 
-IntelliJ IDEA 打开本目录，运行 `com.neu.Application`（Working directory 建议为本模块目录）。
+IntelliJ IDEA 打开本目录，运行 `com.oldman.Application`（Working directory 建议为本模块目录）。
 
 ```bash
 mvn spring-boot:run
