@@ -133,15 +133,15 @@ INSERT INTO jiaofei_jilu (zhangdan_id, laoren_id, jiaofei_jine, jiaofei_fangshi,
  (4,2,3300,'微信','2026-10-02 11:00:00',1,'');
 
 INSERT INTO waichu_shenqing (laoren_id, huli_renyuan_id, shenqing_ren_id, shenqing_ren_xingming, shenqing_ren_leixing, waichu_shiyou, waichu_shijian, yuji_huiyuan_shijian, peitong_ren, peitong_dianhua, shenpi_zhuangtai, shenpi_ren_id, shenpi_shijian, shenpi_yijian) VALUES
- (4,2,NULL,'刘洋','家属','国庆假期回家团聚','2026-10-01 09:00:00','2026-10-12 18:00:00','刘洋','13900000041','已通过',1,'2026-09-29 10:00:00','注意按时服药'),
- (1,1,4,'王晓雯','家属','周末陪同去医院复查','2026-10-13 08:30:00','2026-10-13 16:00:00','王晓雯','13900000021','待审批',NULL,NULL,NULL),
- (2,1,2,'周敏','护理员','家属接老人参加婚宴','2026-10-18 10:00:00','2026-10-18 20:00:00','张伟','13900000031','待审批',NULL,NULL,NULL);
+ (4,2,4,'刘洋','家属','国庆假期回家团聚','2026-10-01 09:00:00','2026-10-12 18:00:00','刘洋','13900000041','通过',1,'2026-09-29 10:00:00','注意按时服药'),
+ (1,1,1,'王晓雯','家属','周末陪同去医院复查','2026-10-13 08:30:00','2026-10-13 16:00:00','王晓雯','13900000021','待审批',NULL,NULL,NULL),
+ (2,1,1,'周敏','护理员','家属接老人参加婚宴','2026-10-18 10:00:00','2026-10-18 20:00:00','张伟','13900000031','待审批',NULL,NULL,NULL);
 
 INSERT INTO tuizhu_shenqing (laoren_id, huli_renyuan_id, shenqing_ren_id, shenqing_ren_xingming, shenqing_ren_leixing, tuizhu_leixing, tuizhu_shijian, tuizhu_yuanyin, shenpi_zhuangtai) VALUES
- (5,2,NULL,'赵敏','家属','正常退住','2026-12-31 10:00:00','短期托养到期，回家居住','待审批');
+ (5,2,5,'赵敏','家属','正常退住','2026-12-31 10:00:00','短期托养到期，回家居住','待审批');
 
 INSERT INTO laoren_xinxi_xiugai_shenqing (laoren_id, laoren_xingming, jiashu_id, jiashu_xingming, yuan_lianxi_dianhua, xin_lianxi_dianhua, yuan_jiating_zhuzhi, xin_jiating_zhuzhi, yuan_beizhu, xin_beizhu, xiugai_shuoming, shenqing_zhuangtai) VALUES
- (1,'王秀兰',4,'王晓雯','13900000021','13900000021','北京市朝阳区示例路 1 号','北京市朝阳区示例路 18 号','高血压，需按时服药','高血压，需按时服药；对海鲜过敏','家庭住址变更，补充过敏信息','待审核');
+ (1,'王秀兰',1,'王晓雯','13900000021','13900000021','北京市朝阳区示例路 1 号','北京市朝阳区示例路 18 号','高血压，需按时服药','高血压，需按时服药；对海鲜过敏','家庭住址变更，补充过敏信息','待审核');
 
 INSERT INTO zanzhu_ren (id, zanzhu_renming, zanzhu_leixing, lianxi_ren, lianxi_dianhua, youxiang, dizhi, jianjie, touxiang_url, gongkai_zhuangtai) VALUES
  (1,'晨光公益基金会','机构','林女士','01080000001','contact@example.org','北京市','长期关注社区养老服务','/uploads/zanzhu/donor-default.jpg',1),
