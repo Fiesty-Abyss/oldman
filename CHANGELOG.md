@@ -1,25 +1,30 @@
 # Changelog
 
-本文件记录仓库在「作品集整理」方向上的可见变更，不涵盖全部业务开发历史。
+## 0.2.0 - 2026-10-11
 
-## Unreleased
+### 新增
 
-- 待补充：`docs/images` 运行截图
-- 待确认：脱敏库表初始化 SQL 是否随仓库提供
+- `db/schema.sql`：根据 MyBatis Mapper 整理的完整建表脚本（31 张表 + 2 个公开赞助视图），克隆后即可建库运行
+- `db/seed.sql`：虚构演示数据，覆盖三种角色、入住、床位、护理、健康用药、审批、费用与公益赞助
+- 数据库连接支持环境变量 `OLDMAN_DB_URL` / `OLDMAN_DB_USER` / `OLDMAN_DB_PASSWORD`
+- `scripts/smoke_test.py`：用演示账号登录三种角色，检查全部 GET 接口与角色隔离
+- `docs/screenshots/`：20 张各角色主要页面的真实运行截图
 
-## 2026-07-26
+### 修复
 
-### Documentation & repository presentation
+- Map 结果中的 `DATE` 列被序列化为 UTC 时间戳，家属端床位、用药计划、公益赞助等页面日期显示早一天
+- 访问不存在的路径返回 500，改为 404
+- 未预期异常把 SQL / 内部错误信息直接返回给前端，改为只记录日志并返回通用提示
 
-- 重写根 `README.md`，面向校招作品展示（角色、流程、亮点、限制）
-- 整理 `docs/`：巡检材料归档至 `docs/audit/`，新增 `docs/images/` 占位
-- 巡检报告脱敏（去除本机绝对路径与演示口令）
-- 修订 `docs/database.md` 过时表述（公开仓库口径、MySQL 说明）
-- 停止跟踪 `materials/` 与 `docs/成果物.zip`（课程材料/异质打包，本地可仍保留）
-- 完善 `.gitignore`、补充 `.editorconfig` / `.gitattributes`
+### 变更
 
-## 2026-07-23
+- 默认头像（`uploads/avatar/user-default.jpg`、`family-default.jpg`）由真人照片换成中性占位图
+- README 重写为产品主页：亮点、适用场景、功能总览与截图、业务流程、对比、快速开始、FAQ、路线图
+- `docs/database.md` 改为基于 `db/` 脚本的建库说明，补充演示账号；`docs/shenqing-liucheng.md` 按当前实现更新
+- 移除一次性的巡检归档（`docs/audit/`）与仓库整理报告
 
-### Initial public cleanup
+## 0.1.0 - 2026-07-26
 
-- 初始提交与数据源占位符、上传路径相对化等安全向整理（见 Git 历史）
+- 首个公开版本：Spring Boot + MyBatis 后端（`oldman01`）与 Vue 3 + Vite 前端（`oldman1`）
+- 公开端、管理员、护理员、家属四端业务闭环
+- 数据源配置占位、上传路径相对化、`.gitignore` / `.editorconfig` / `.gitattributes`
